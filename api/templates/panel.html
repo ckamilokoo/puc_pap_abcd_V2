@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title></title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <style>
+    /* Estilos para el formulario */
+    /* Estilos para el contenedor del formulario */
+    .form-container {
+      max-width: 1200px; /* Ancho máximo del contenedor */
+      margin: 0 auto; /* Centrar el contenedor horizontalmente */
+      padding: 20px; /* Espaciado interno del contenedor */
+      border: 1px solid #ddd; /* Borde del contenedor */
+      border-radius: 8px; /* Bordes redondeados */
+      background-color: #f9f9f9; /* Color de fondo del contenedor */
+    }
+
+    /* Estilos para los campos de entrada */
+    .form-container input[type="text"],
+    .form-container input[type="number"],
+    .form-container textarea {
+      width: calc(
+        100% - 20px
+      ); /* Ancho del campo de entrada, ajustado por el padding */
+      padding: 10px; /* Espaciado interno */
+      margin-bottom: 10px; /* Margen inferior entre campos */
+      border: 1px solid #ccc; /* Borde del campo */
+      border-radius: 4px; /* Bordes redondeados */
+      box-sizing: border-box; /* Incluir padding y borde en el ancho total */
+    }
+
+    /* Estilos para el botón de enviar */
+    .form-container input[type="submit"] {
+      background-color: #4caf50; /* Color de fondo del botón */
+      color: white; /* Color del texto del botón */
+      padding: 12px 20px; /* Espaciado interno del botón */
+      border: none; /* Sin borde */
+      border-radius: 4px; /* Bordes redondeados */
+      cursor: pointer; /* Cambio de cursor al pasar sobre el botón */
+      transition: background-color 0.3s ease; /* Transición suave del color de fondo */
+    }
+
+    .form-container input[type="submit"]:hover {
+      background-color: #45a049; /* Color de fondo del botón al pasar el mouse */
+    }
+
+    /* Estilos para la tabla */
+
+    .container {
+      max-width: 1600px; /* Ancho máximo del contenedor */
+      margin: 0 auto; /* Centrar el contenedor horizontalmente */
+      padding: 20px; /* Espaciado interno del contenedor */
+    }
+    #tabla-casos {
+      width: 100%;
+      border-collapse: collapse; /* Para que los bordes de las celdas se fusionen */
+    }
+
+    /* Estilos para los encabezados de la tabla */
+    #tabla-casos th {
+      background-color: #f2f2f2; /* Color de fondo */
+      text-align: left; /* Alineación del texto */
+      padding: 8px; /* Espaciado interno */
+    }
+
+    /* Estilos para las celdas de la tabla */
+    #tabla-casos td {
+      border: 1px solid #dddddd; /* Borde de las celdas */
+      text-align: left; /* Alineación del texto */
+      padding: 8px; /* Espaciado interno */
+    }
+
+    /* Estilos alternados para filas */
+    #tabla-casos tr:nth-child(even) {
+      background-color: #f2f2f2; /* Color de fondo para filas pares */
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .formulario,
+    .cardbody,
+    .list,
+    .caso {
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin: 20px;
+    }
+
+    input {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      width: calc(100% - 22px);
+    }
+
+    .btn {
+      padding: 10px 20px;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Estilos específicos para cada botón */
+    .copiar-datos {
+      background-color: #4caf50; /* Verde */
+    }
+
+    .copiar-datos:hover {
+      background-color: #45a049; /* Verde más oscuro */
+    }
+
+    .simular-caso {
+      background-color: #2196f3; /* Azul */
+    }
+
+    .simular-caso:hover {
+      background-color: #1e88e5; /* Azul más oscuro */
+    }
+
+    .eliminar-caso {
+      background-color: #f44336; /* Rojo */
+    }
+
+    .eliminar-caso:hover {
+      background-color: #e53935; /* Rojo más oscuro */
+    }
+
+    .list ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .list li {
+      margin: 10px 0;
+    }
+
+    .cardbody,
+    .caso {
+      display: none;
+    }
+  </style>
+  <body>
+    <section>
+      <div class="form-container">
+        <form
+          action="{{url_for('NuevoCaso.f')}}"
+          method="POST"
+          onsubmit="actualizarCasos()"
+        >
+          <label for="nombre">Nombre:</label><br />
+          <input type="text" id="nombre" name="nombre" required /><br /><br />
+
+          <label for="lugar">Lugar del evento:</label><br />
+          <input type="text" id="lugar" name="lugar" required /><br /><br />
+
+          <label for="tipo_evento">Tipo de evento traumático:</label><br />
+          <input
+            type="text"
+            id="tipo_evento"
+            name="tipo_evento"
+            required
+          /><br /><br />
+
+          <label for="situacion">Situación problema:</label><br />
+          <textarea id="situacion" name="situacion" rows="4" required></textarea
+          ><br /><br />
+
+          <label for="caracteristicas">Características de la persona:</label
+          ><br />
+          <textarea
+            id="caracteristicas"
+            name="caracteristicas"
+            rows="4"
+            required
+          ></textarea
+          ><br /><br />
+
+          <label for="edad">Edad:</label><br />
+          <input type="number" id="edad" name="edad" required /><br /><br />
+
+          <label for="con_quien_vive">Con quien vive:</label><br />
+          <input
+            type="text"
+            id="con_quien_vive"
+            name="con_quien_vive"
+            required
+          /><br /><br />
+
+          <label for="nivel_estudios">Nivel de estudios:</label><br />
+          <input
+            type="text"
+            id="nivel_estudios"
+            name="nivel_estudios"
+            required
+          /><br /><br />
+
+          <label for="estado_civil">Estado civil:</label><br />
+          <input
+            type="text"
+            id="estado_civil"
+            name="estado_civil"
+            required
+          /><br /><br />
+
+          <label for="hobbies">Hobbies:</label><br />
+          <input type="text" id="hobbies" name="hobbies" required /><br /><br />
+
+          <input type="submit" value="Enviar" />
+        </form>
+      </div>
+
+      <div class="container">
+        <table id="tabla-casos">
+          <h1>Listado de los Casos</h1>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Contexto</th>
+              <th>Descripcion</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="lista-casos">
+            {% for caso in casos %}
+            <tr>
+              <td>{{ caso.nombre }}</td>
+              <td>{{ caso.situacion_problema }}</td>
+              <td>{{ caso.caracteristicas_de_la_persona }}</td>
+              <td>
+                <button
+                  class="btn copiar-datos"
+                  onclick="copiarDatos({{ caso.id }})"
+                >
+                  Copiar Datos
+                </button>
+                <hr />
+                <button
+                  class="btn simular-caso"
+                  onclick="simular('{{ caso.nombre }}')"
+                >
+                  Simular Caso
+                </button>
+                <hr />
+                <button
+                  class="btn eliminar-caso"
+                  onclick="eliminarCaso({{ caso.id }})"
+                >
+                  Eliminar Caso
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="caso" id="caso-creado">
+        <div class="cardbody">
+          <h2>Información del Caso Creado</h2>
+          <p><strong>Nombre:</strong> <span id="info-nombre"></span></p>
+          <p>
+            <strong>Situación Problema:</strong>
+            <span id="info-situacion"></span>
+          </p>
+          <p>
+            <strong>Características de la Persona:</strong>
+            <span id="info-caracteristicas"></span>
+          </p>
+        </div>
+      </div>
+    </section>
+    <script>
+      function eliminarCaso(casoId) {
+        if (confirm("¿Estás seguro de que deseas eliminar este caso?")) {
+          fetch(`/caso/${casoId}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.message === "Caso eliminado exitosamente") {
+                alert(data.message);
+                // Recargar la página para reflejar los cambios
+                window.location.reload();
+              } else {
+                alert("Hubo un error al eliminar el caso.");
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Hubo un error al eliminar el caso.");
+            });
+        }
+      }
+
+      function simular(nombre) {
+        fetch("/initDialogue", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ template: nombre }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.response) {
+              alert(data.response);
+            } else if (data.error) {
+              alert(data.error);
+            }
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      function copiarDatos(id) {
+        fetch(`/antecedentes/${id}`)
+          .then((response) => response.json())
+          .then((caso) => {
+            document.getElementById("nombre").value = caso.nombre_persona || "";
+            document.getElementById("lugar").value =
+              caso.lugar_del_evento || "";
+            document.getElementById("tipo_evento").value =
+              caso.tipo_de_evento_traumatico || "";
+            document.getElementById("situacion").value =
+              caso.situacion_problema || "";
+            document.getElementById("caracteristicas").value =
+              caso.caracteristicas_de_la_persona || "";
+            document.getElementById("edad").value = caso.edad || "";
+            document.getElementById("con_quien_vive").value =
+              caso.con_quien_vive || "";
+            document.getElementById("nivel_estudios").value =
+              caso.nivel_de_estudios || "";
+            document.getElementById("estado_civil").value =
+              caso.estado_civil || "";
+            document.getElementById("hobbies").value = caso.hobbies || "";
+          })
+          .catch((error) =>
+            console.error("Error al obtener los antecedentes:", error)
+          );
+      }
+    </script>
+  </body>
+</html>
