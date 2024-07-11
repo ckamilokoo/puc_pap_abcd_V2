@@ -1,16 +1,8 @@
 import os
-import re
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-#from langchain-ibm import Model
-from ibm_watson_machine_learning.foundation_models import Model
-from ibm_watson_machine_learning.foundation_models.utils.enums import ModelTypes
-from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
-# For State Graph
-from typing_extensions import TypedDict
-import os
-# Generation Prompt
 from langchain_ibm import WatsonxLLM
+from langchain_core.output_parsers import StrOutputParser
+import re
 
 llama_3_model = WatsonxLLM(
     model_id="meta-llama/llama-3-70b-instruct",
