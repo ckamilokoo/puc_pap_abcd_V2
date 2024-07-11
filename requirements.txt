@@ -9,6 +9,7 @@ click==8.1.7
 colorama==0.4.6
 flask==3.0.3
 flask-cors==4.0.1
+flask_smorest
 ibm-cos-sdk==2.13.4
 ibm-cos-sdk-core==2.13.4
 ibm-cos-sdk-s3transfer==2.13.4
