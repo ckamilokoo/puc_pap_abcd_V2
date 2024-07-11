@@ -305,13 +305,28 @@
       }
 
       function simular(nombre) {
-        fetch("/initDialogue", {
+        fetch("/sendResponse", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ template: nombre }),
+          body: JSON.stringify({ response: "/reset" }),
         })
+          .then((response) => {
+            // Aquí manejas la respuesta del reinicio del historial si es necesario
+            if (response.ok) {
+              // Llamada a /initDialogue después del reset
+              return fetch("/initDialogue", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ template: nombre }),
+              });
+            } else {
+              throw new Error("Error al reiniciar el historial");
+            }
+          })
           .then((response) => response.json())
           .then((data) => {
             if (data.response) {
