@@ -10,9 +10,9 @@ charset-normalizer==3.3.2
 click==8.1.7
 colorama==0.4.6
 dataclasses-json==0.6.6
-flask==3.0.3
+flask==2.3.3
 flask-cors==4.0.1
-flask_smorest==0.36.0
+flask-smorest==0.36.0
 flask-sqlalchemy==3.0.0
 flask-migrate==4.0.3
 ibm-cos-sdk==2.13.4
@@ -55,5 +55,6 @@ urllib3==2.1.0
 werkzeug==3.0.3
 wheel==0.43.0
 zipp==3.18.2
+
 
 
