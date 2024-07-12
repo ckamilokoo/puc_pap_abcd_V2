@@ -2,44 +2,51 @@ from ibm_watsonx_ai.foundation_models import Model
 from .funcs import get_credentials
 import os
 import json
+
 class CustomAgent:
     system_prompt = None
     user_prompt = None
     full_prompt = None
+
     def __init__(self):
         parameters = {
-        "decoding_method": "greedy",
-        "max_new_tokens": 4000,
-        "repetition_penalty": 1,
-        "temperature" : 1
+            "decoding_method": "greedy",
+            "max_new_tokens": 4000,
+            "repetition_penalty": 1,
+            "temperature" : 1
         }
 
         self.model = Model(
-        model_id = "meta-llama/llama-3-8b-instruct",
-        credentials = get_credentials(),
-        project_id = '291498a9-1626-4838-81d1-06b5ebb62d3f',
-        params=parameters)
-    def addSystemPrompt(self,system_prompt):
+            model_id = "meta-llama/llama-3-8b-instruct",
+            credentials = get_credentials(),
+            project_id = '291498a9-1626-4838-81d1-06b5ebb62d3f',
+            params=parameters
+        )
+
+    def addSystemPrompt(self, system_prompt):
         self.system_prompt = f"""
-        <|start_header_id|>system<|end_header_id|>
+        system
 
         {system_prompt}
         """
-    def addUserPrompt(self,user_prompt):
+
+    def addUserPrompt(self, user_prompt):
         self.user_prompt = f"""
-        <|begin_of_text|><|eot_id|><|start_header_id|>user<|end_header_id|>
+        user
         {user_prompt}
         """
+
     def runAgent(self):
         prompt = f"""
         {self.system_prompt}
         
         {self.user_prompt}
         
-        <|eot_id|><|start_header_id|>assistant<|end_header_id|>
+        assistant
         """
         generated_response = self.model.generate_text(prompt=prompt)
         return generated_response
+
 
 class Dialogue:
     def __init__(self, agent, patient_params):
@@ -58,7 +65,7 @@ class Dialogue:
 
         This is the current conversation:
         """
-    
+
     def parseResponse(response):
         pass
 
@@ -79,22 +86,27 @@ class Dialogue:
         """
             return "Se ha eliminado el historial de la conversación"
 
-        self.user_history+=f"""
+        self.user_history += f"""
         
         "speaker": "Doctor",
-        "text" : "{doctor_answer}"
+        "text": "{doctor_answer}"
         
         """
         
         self.agent.addUserPrompt(self.user_history)
         agent_response = self.agent.runAgent()
         
-        self.user_history+=f"""
+        self.user_history += f"""
         {agent_response}"
         """
-        print(agent_response)
-        agent_response = "{"+agent_response+"}"
-        return json.loads(agent_response)
+        print(f"Generated response: {agent_response}")
+        
+        try:
+            # Ensure agent_response is a valid JSON string
+            return json.loads(agent_response)
+        except json.JSONDecodeError as e:
+            print(f"JSON decoding error: {e}")
+            return {"error": "Invalid response format"}
 
     def getUserHistory(self):
         return self.user_history
