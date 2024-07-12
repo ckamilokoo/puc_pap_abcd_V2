@@ -108,6 +108,26 @@ class LLM_Routes():
 
         self.llm_bp.append(simple_page)
         print(f"Blueprint created: {simple_page.name} for /initDialogue")
+        
+        
+    def getCaseInfo(self):
+        case_info_page = Blueprint("getCaseInfo", __name__)
+
+        @case_info_page.route("/getCaseInfo", methods=["GET"])
+        @cross_origin()
+        def get_case_info():
+            if self.dialogue:
+                # Aquí asumimos que tienes acceso a self.dialogue desde tu instancia actual
+                caso_actual = self.dialogue.patient_params
+                return jsonify({
+                    "contexto_para_participantes": caso_actual["contexto_para_participantes"],
+                    "descripcion_personaje": caso_actual["descripcion_personaje"]
+                }), 200
+            else:
+                return jsonify({"error": "No se ha iniciado ningún diálogo"}), 404
+
+        self.llm_bp.append(case_info_page)
+        print(f"Blueprint created: {case_info_page.name} for /getCaseInfo")
 
 
 
@@ -190,5 +210,6 @@ class LLM_Routes():
         self.panel()
         self.NuevoCaso()
         self.eliminar_caso()
+        self.getCaseInfo()
         print("Blueprints created:", [bp.name for bp in self.llm_bp])  # Print the names of blueprints
         return self.llm_bp
