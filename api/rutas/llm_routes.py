@@ -7,6 +7,7 @@ from modelos.documents import Document
 from flask import jsonify, render_template, request, jsonify, Response , redirect , url_for
 import re
 from casos.models import Caso, db , Antecedentes
+import json
 
 conversation_agent = CustomAgent()
 conversation_agent.addSystemPrompt("""
@@ -20,6 +21,8 @@ You should always generate the response following the following format and in Sp
 
 "speaker":
 "text":
+
+
 """)
 
 class LLM_Routes():

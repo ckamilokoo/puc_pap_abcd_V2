@@ -2,6 +2,7 @@ from ibm_watsonx_ai.foundation_models import Model
 from .funcs import get_credentials
 import os
 import json
+import re
 
 class CustomAgent:
     system_prompt = None
@@ -25,14 +26,14 @@ class CustomAgent:
 
     def addSystemPrompt(self, system_prompt):
         self.system_prompt = f"""
-        system
+        <|start_header_id|>system<|end_header_id|>
 
         {system_prompt}
         """
 
     def addUserPrompt(self, user_prompt):
         self.user_prompt = f"""
-        user
+        <|begin_of_text|><|eot_id|><|start_header_id|>user<|end_header_id|>
         {user_prompt}
         """
 
@@ -42,7 +43,7 @@ class CustomAgent:
         
         {self.user_prompt}
         
-        assistant
+        <|eot_id|><|start_header_id|>assistant<|end_header_id|>
         """
         generated_response = self.model.generate_text(prompt=prompt)
         return generated_response
@@ -97,16 +98,11 @@ class Dialogue:
         agent_response = self.agent.runAgent()
         
         self.user_history += f"""
-        {agent_response}"
+        {agent_response}
         """
-        print(f"Generated response: {agent_response}")
-        
-        try:
-            # Ensure agent_response is a valid JSON string
-            return json.loads(agent_response)
-        except json.JSONDecodeError as e:
-            print(f"JSON decoding error: {e}")
-            return {"error": "Invalid response format"}
+        print(agent_response)
+        agent_response = "{"+agent_response+"}"
+        return json.loads(agent_response)
 
     def getUserHistory(self):
         return self.user_history
@@ -118,3 +114,5 @@ class Dialogue:
             response = self.getNextResponse(next_question)
             print(response)
             idx += 1
+
+    
