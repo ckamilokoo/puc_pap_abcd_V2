@@ -3,7 +3,7 @@ from langchain.prompts import PromptTemplate
 from langchain_ibm import WatsonxLLM
 from langchain_core.output_parsers import StrOutputParser
 import re
-
+import asyncio
 llama_3_model = WatsonxLLM(
     model_id="meta-llama/llama-3-70b-instruct",
     url="https://us-south.ml.cloud.ibm.com",
@@ -106,3 +106,4 @@ def get_credentials():
 		"url" : "https://us-south.ml.cloud.ibm.com",
 		"apikey" : "CKncU816nSvrWmBslp8bkyidGa1dceB7imTWr2Kl45VH"
 	}
+
