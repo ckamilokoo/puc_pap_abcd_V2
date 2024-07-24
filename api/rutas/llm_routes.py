@@ -240,7 +240,7 @@ It is very important that you normalize those emotional reactions that, although
             self.current_time = datetime.datetime.now()
             print(self.current_time - self.init_time)
             dif = self.current_time - self.init_time
-            if (dif > datetime.timedelta(minutes=2)):
+            if (dif > datetime.timedelta(minutes=20)):
                 return jsonify({"response": {
         "speaker": "",
         "text": "El tiempo ha finalizado"
