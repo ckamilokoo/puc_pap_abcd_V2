@@ -240,8 +240,11 @@ It is very important that you normalize those emotional reactions that, although
             self.current_time = datetime.datetime.now()
             print(self.current_time - self.init_time)
             dif = self.current_time - self.init_time
-            if (dif > datetime.timedelta(minutes=30)):
-                return jsonify({"response": "El tiempo ha finalizado"})
+            if (dif > datetime.timedelta(minutes=2)):
+                return jsonify({"response": {
+        "speaker": "",
+        "text": "El tiempo ha finalizado"
+    }})
             msg = request.json["response"]
             response = self.dialogue.getNextResponse(doctor_answer=msg)
             return jsonify({"response": response}),200
@@ -344,6 +347,16 @@ It is very important that you normalize those emotional reactions that, although
         self.llm_bp.append(simple_page)
         print(f"Blueprint created: {simple_page.name} for /")
         
+    def chatbot(self):
+        simple_page=Blueprint("chatbot", __name__)
+        @simple_page.route("/chat", methods=["GET"])
+        @cross_origin()
+        def f():
+            
+            return render_template("chatbot.html")
+        self.llm_bp.append(simple_page)
+        print(f"Blueprint created: {simple_page.name} for /chat")
+        
     
     def eliminar_caso(self):
         simple_page = Blueprint("eliminar_caso", __name__)
@@ -376,5 +389,6 @@ It is very important that you normalize those emotional reactions that, although
         self.getCaseInfo()
         self.getFeedback()
         self.endInteraction()
+        self.chatbot()
         print("Blueprints created:", [bp.name for bp in self.llm_bp])  # Print the names of blueprints
         return self.llm_bp
