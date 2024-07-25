@@ -66,6 +66,7 @@ class Dialogue:
 
         This is the current conversation:
         """
+        self.initial_len = len(self.user_history)
 
     def parseResponse(response):
         pass
