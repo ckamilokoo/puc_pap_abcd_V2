@@ -10,7 +10,8 @@ docx
 langchain
 langchain_core
 langchain_ibm
-
+psycopg2
+psycopg2-binary 
 
 
 
