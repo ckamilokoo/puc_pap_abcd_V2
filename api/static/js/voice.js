@@ -168,7 +168,7 @@ async function playAudio(text2speechContent) {
     "https://api.us-south.text-to-speech.watson.cloud.ibm.com/instances/bc169411-2396-4664-bc78-3368a70ca647/v1/synthesize"
   );
   baseUrl.searchParams.append("accept", "audio/mp3");
-  baseUrl.searchParams.append("voice", "en-US_AllisonV3Voice");
+  baseUrl.searchParams.append("voice", "es-LA_SofiaV3Voice");
   baseUrl.searchParams.append("text", text2speechContent);
 
   await fetch(baseUrl.href, requestOptions)
