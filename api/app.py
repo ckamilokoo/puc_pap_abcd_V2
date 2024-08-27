@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_smorest import Api
-from rutas.llm_routes import LLM_Routes
+from api.rutas.llm_routes import LLM_Routes
 from config import ServerConfig
 from casos.models import db, Caso , Antecedentes
 
