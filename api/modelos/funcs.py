@@ -4,11 +4,22 @@ from langchain_ibm import WatsonxLLM
 from langchain_core.output_parsers import StrOutputParser
 import re
 import asyncio
+from dotenv import load_dotenv
+
+
+# Cargar las variables de entorno desde el archivo .env
+load_dotenv()
+
+apikey = os.getenv('apikey')
+project_id = os.getenv('project_id')
+
+
+
 llama_3_model = WatsonxLLM(
     model_id="meta-llama/llama-3-70b-instruct",
     url="https://us-south.ml.cloud.ibm.com",
-    apikey="0GY8cqsa49R8Gs6aiK0RB5Hb6ZRDFyKew474yYfVJBKa",
-    project_id="37e2e673-598a-4dca-af77-b102ee3b47c9",
+    apikey=apikey,
+    project_id=project_id,
     params={
   "decoding_method": "greedy",
   "max_new_tokens": 4096,
@@ -104,6 +115,6 @@ def getText(filename):
 def get_credentials():
 	return {
 		"url" : "https://us-south.ml.cloud.ibm.com",
-		"apikey" : "CKncU816nSvrWmBslp8bkyidGa1dceB7imTWr2Kl45VH"
+		"apikey" : apikey
 	}
 

@@ -1,10 +1,23 @@
+import os 
+from dotenv import load_dotenv
+import base64
 
+
+# Cargar las variables de entorno desde el archivo .env
+load_dotenv()
+
+certificate_base64 = os.getenv("CERTIFICATE_BASE64")
+cert_bytes = base64.b64decode(certificate_base64)
+
+# Almacena el certificado en un archivo temporal
+with open("/tmp/certificate.crt", "wb") as cert_file:
+    cert_file.write(cert_bytes)
 
 
 class ServerConfig:
 
-    SECRET_KEY = 'your_secret_key'
-    SQLALCHEMY_DATABASE_URI ='postgresql://ibm_cloud_9467e667_81b9_4619_8b02_96c77cd1b716:08f87cd8eebe85554b0e3e2ee555fbe6c05e92fccf7364c3e61d556b9740cd19@8c45c960-1ec9-46fb-b8b4-d1d4413c4336.6131b73286f34215871dfad7254b4f7d.databases.appdomain.cloud:30596/ibmclouddb?sslmode=verify-full&sslrootcert=/usr/app/src/certificate.crt'
+    SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 

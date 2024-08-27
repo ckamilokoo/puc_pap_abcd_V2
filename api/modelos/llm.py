@@ -3,6 +3,14 @@ from .funcs import get_credentials
 import os
 import json
 import re
+from dotenv import load_dotenv
+
+
+# Cargar las variables de entorno desde el archivo .env
+load_dotenv()
+
+apikey = os.getenv('apikey')
+project_id = os.getenv('project_id')
 
 class CustomAgent:
     system_prompt = None
@@ -20,7 +28,7 @@ class CustomAgent:
         self.model = Model(
             model_id = "meta-llama/llama-3-8b-instruct",
             credentials = get_credentials(),
-            project_id = '291498a9-1626-4838-81d1-06b5ebb62d3f',
+            project_id = project_id,
             params=parameters
         )
 

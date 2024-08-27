@@ -10,7 +10,9 @@ docx
 langchain
 langchain_core
 langchain_ibm
-psycopg2-binary 
+psycopg2-binary
+gunicorn
+python-dotenv
 
 
 

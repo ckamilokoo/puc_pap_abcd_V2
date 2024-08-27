@@ -13,11 +13,11 @@ WORKDIR /usr/app/src
 # Copiar los archivos necesarios al contenedor
 COPY requirements.txt .
 COPY api/ ./api/
-COPY api/certificate.crt ./certificate.crt
+
 
 # Instalar las dependencias
 RUN pip install --no-cache -r requirements.txt
 
 # Comando para ejecutar la aplicación
-CMD ["python", "./api/app.py"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "api.app:app"]
 
