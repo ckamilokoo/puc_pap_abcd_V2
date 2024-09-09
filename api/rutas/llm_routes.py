@@ -10,6 +10,7 @@ from api.casos.models import Caso, db , Antecedentes
 import json
 import asyncio
 import datetime
+from datetime import datetime
 
 conversation_agent = CustomAgent()
 conversation_agent.addSystemPrompt("""
@@ -202,9 +203,10 @@ It is very important that you normalize those emotional reactions that, although
             )
             db.session.add(antecedentes)
             db.session.commit()
-
+            # Obtener la fecha actual
+            fecha_actual = datetime.now().strftime("%d/%m/%Y")
             antecedentes_str = ", ".join([f"{key}={value}" for key, value in data.items()])
-            response = Nuevo_Caso(antecedentes_str)
+            response = Nuevo_Caso(antecedentes_str , fecha_actual)
 
             # Separar la respuesta en 'situacion_problema' y 'caracteristicas_de_la_persona'
             situacion_problema = re.search(r'situacion_problema=(.*?)(?=caracteristicas_de_la_persona=)', response, re.DOTALL).group(1).strip()

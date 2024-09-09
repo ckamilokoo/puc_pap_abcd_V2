@@ -34,7 +34,7 @@ llama_3_model = WatsonxLLM(
 
 
 
-def Nuevo_Caso(antecedentes:str):
+def Nuevo_Caso(antecedentes:str , fecha:str):
 
     generate_prompt = PromptTemplate(
         template="""
@@ -43,7 +43,7 @@ def Nuevo_Caso(antecedentes:str):
 
         <|start_header_id|>system<|end_header_id|>
 
-        You are a friendly AI assistant , which has a task which is to create new cases of people that serve to be interpreted by another AI , the cases are experiences of people who suffered some vulnerability or some problem in their day to day .
+        You are a nice AI assistant, who has a task that is to create new cases of people that serve to be interpreted by another AI, the cases are experiences of people who suffered some vulnerability or some problem in their day to day, it is necessary that the maximum time of elapsed the problem must be 1 weeks at most.
         You should use the following examples to understand how your answer should be.
         you will receive the background of the person and the situation they suffered to which you must add more information to enrich the case.
         Your answer must be in Spanish, and you must create the problem situation with more information and the characteristics of the person.
@@ -79,19 +79,20 @@ def Nuevo_Caso(antecedentes:str):
         <|start_header_id|>user<|end_header_id|>
 
         antecedentes: {antecedentes}
+        fecha del suceso:{fecha}
         Answer:
 
         <|eot_id|>
 
         <|start_header_id|>assistant<|end_header_id|>""",
-        input_variables=["antecedentes"],
+        input_variables=["antecedentes","fecha"],
     )
 
     # Chain
     sql_chain = generate_prompt | llama_3_model | StrOutputParser()
 
 
-    resultado=sql_chain.invoke({"antecedentes":antecedentes})
+    resultado=sql_chain.invoke({"antecedentes":antecedentes,"fecha":fecha})
     #print(resultado)
     return resultado
 
