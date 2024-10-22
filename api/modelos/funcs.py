@@ -16,7 +16,7 @@ project_id = os.getenv('project_id')
 
 
 llama_3_model = WatsonxLLM(
-    model_id="meta-llama/llama-3-70b-instruct",
+    model_id="meta-llama/llama-3-1-70b-instruct",
     url="https://us-south.ml.cloud.ibm.com",
     apikey=apikey,
     project_id=project_id,
@@ -32,7 +32,36 @@ llama_3_model = WatsonxLLM(
     )
 
 
+def analizar_estado(respuesta:str):
 
+    generate_prompt = PromptTemplate(
+        template="""
+
+        <|begin_of_text|>
+
+        <|start_header_id|>system<|end_header_id|>
+        You are a nice AI assistant, who has a task which is to analyze the response of a patient regarding how he feels during the conversation with the doctor, you must classify the response of the model in positive, negative or neutral.
+        So only in your answer you must return one of the following 3 alternatives: positivo, negativo or neutral. 
+        <|eot_id|>
+
+        <|start_header_id|>user<|end_header_id|>
+
+        respuesta del paciente:{respuesta}
+        Answer:
+
+        <|eot_id|>
+
+        <|start_header_id|>assistant<|end_header_id|>""",
+        input_variables=["respuesta"],
+    )
+
+    # Chain
+    analizar = generate_prompt | llama_3_model | StrOutputParser()
+
+
+    resultado=analizar.invoke({"respuesta":respuesta})
+    #print(resultado)
+    return resultado
 
 def Nuevo_Caso(antecedentes:str , fecha:str):
 

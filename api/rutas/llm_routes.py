@@ -1,16 +1,16 @@
 from flask_smorest import Blueprint 
-from api.modelos.funcs import Nuevo_Caso
+from modelos.funcs import Nuevo_Caso , analizar_estado
 from flask_cors import cross_origin
-from api.schemas.request_schemas import InitDialogueSchema, SendResponseSchema , NuevoCaso
-from api.modelos.llm import Dialogue, CustomAgent
-from api.modelos.documents import Document
+from schemas.request_schemas import InitDialogueSchema, SendResponseSchema , NuevoCaso
+from modelos.llm import Dialogue, CustomAgent
+from modelos.documents import Document
 from flask import jsonify, render_template, request, jsonify, Response , redirect , url_for
 import re
-from api.casos.models import Caso, db , Antecedentes
+from casos.models import Caso, db , Antecedentes
 import json
 import asyncio
 import datetime
-from datetime import datetime
+
 
 conversation_agent = CustomAgent()
 conversation_agent.addSystemPrompt("""
@@ -236,21 +236,58 @@ It is very important that you normalize those emotional reactions that, although
 
     def sendResponse(self):
         simple_page = Blueprint("sendResponse", __name__)
-        @simple_page.route("/sendResponse", methods = ["POST"])
+
+        @simple_page.route("/sendResponse", methods=["POST"])
         @cross_origin()
         def f():
             self.current_time = datetime.datetime.now()
-            print(self.current_time - self.init_time)
             dif = self.current_time - self.init_time
-            if (dif > datetime.timedelta(minutes=20)):
-                return jsonify({"response": {
-        "speaker": "",
-        "text": "El tiempo ha finalizado"
-    }})
+
             msg = request.json["response"]
-            response = self.dialogue.getNextResponse(doctor_answer=msg)
-            return jsonify({"response": response}),200
+            response = None
+
+            # Verifica si han pasado los 5, 10 o 40 minutos para preguntar cómo se siente el paciente
+            if dif > datetime.timedelta(minutes=40):
+                return jsonify({"response": {"speaker": "", "text": "El tiempo ha finalizado"}})
+            elif dif > datetime.timedelta(minutes=10):
+                # Pregunta cómo se siente el paciente
+                r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
+                emotion = analizar_estado(r)
+
+                # Actualiza el estado emocional del paciente
+                if emotion == "positivo":
+                    self.dialogue.patient_params["descripcion_personaje"] += " Te sientes más calmado respecto al evento traumático."
+                elif emotion == "negativo":
+                    self.dialogue.patient_params["descripcion_personaje"] += " Te sientes peor porque no se está prestando atención a tu situación."
+                elif emotion == "neutral":
+                    self.dialogue.patient_params["descripcion_personaje"] += " Te sientes igual y no percibes cambios en la conversación."
+
+                # Genera la siguiente respuesta
+                response = self.dialogue.getNextResponse(doctor_answer=msg)
+            elif dif > datetime.timedelta(minutes=5):
+                r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido en esta conversación?")
+                emotion = analizar_estado(r)
+
+                # Actualiza el estado emocional basado en el análisis de la emoción
+                if emotion == "positivo":
+                    self.dialogue.patient_params["descripcion_personaje"] += " Te sientes un poco mejor con la charla."
+                elif emotion == "negativo":
+                    self.dialogue.patient_params["descripcion_personaje"] += " Te sientes peor porque la charla no te está ayudando."
+                elif emotion == "neutral":
+                    self.dialogue.patient_params["descripcion_personaje"] += " Te sientes igual que al inicio de la conversación."
+
+                # Genera la siguiente respuesta
+                response = self.dialogue.getNextResponse(doctor_answer=msg)
+            else:
+                # Respuesta estándar si no ha transcurrido mucho tiempo
+                response = self.dialogue.getNextResponse(doctor_answer=msg)
+
+            return jsonify({"response": response}), 200
+
         self.llm_bp.append(simple_page)
+
+
+
 
 
     def initDialogue(self):
