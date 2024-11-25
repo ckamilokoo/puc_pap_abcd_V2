@@ -1,9 +1,10 @@
 from ibm_watsonx_ai.foundation_models import Model
-from .funcs import get_credentials , analizar_estado
+from .funcs import get_credentials 
 import os
 import json
 import re
 from dotenv import load_dotenv
+import requests
 
 
 # Cargar las variables de entorno desde el archivo .env
@@ -27,7 +28,7 @@ class CustomAgent:
         }
 
         self.model = Model(
-            model_id = "meta-llama/llama-3-1-70b-instruct",
+            model_id = "meta-llama/llama-3-70b-instruct",
             credentials = get_credentials(),
             project_id = project_id,
             params=parameters
@@ -47,20 +48,7 @@ class CustomAgent:
         """
 
     def runAgent(self):
-        # Aquí actualizamos el prompt con el estado emocional del paciente
-        if self.emotional_state:
-            emotional_prompt = f"Actualmente el paciente se siente {self.emotional_state}."
-            prompt = f"""
-            {self.system_prompt}
-
-            {self.user_prompt}
-
-            {emotional_prompt}
-
-            <|eot_id|><|start_header_id|>assistant<|end_header_id|>
-            """
-        else:
-            prompt = f"""
+        prompt = f"""
             {self.system_prompt}
             
             {self.user_prompt}
@@ -71,8 +59,7 @@ class CustomAgent:
         generated_response = self.model.generate_text(prompt=prompt)
         return generated_response
 
-    def updateEmotionalState(self, state):
-        self.emotional_state = state
+    
 
 
 
@@ -86,7 +73,7 @@ class Dialogue:
 
         The following situation occurred to the patient: {patient_params['contexto_para_participantes']}
         
-        The patient should be characterized as follows: {patient_params['descripcion_personaje']}
+        The patient should be characterized as follows: {patient_params['descripcion_personaje']}  , which you must remember to give your patient's answers.
         
         The patient must answer following all the instructions given by the psychiatrist , You should always say hello first when you are greeted.
         you should never mention your problem in the patient's context right away, you should always wait for the doctor to ask you how you feel or what is the problem that is bothering you or that you are suffering from.
@@ -129,13 +116,9 @@ class Dialogue:
         self.user_history += f"""
         {agent_response}
         """
-        
-        # Analizar el estado emocional
-        emotion = analizar_estado(agent_response)
-        self.agent.updateEmotionalState(emotion)  # Actualizar el estado emocional del agente
-        
-        print(self.user_history)
         print(agent_response)
+        print(self.user_history)
+        
         
         agent_response = "{"+agent_response+"}"
         return json.loads(agent_response)
@@ -150,5 +133,57 @@ class Dialogue:
             response = self.getNextResponse(next_question)
             print(response)
             idx += 1
+            
+    def addHistory(self, historial_recortado):
+        """Añade un historial recortado al historial del usuario."""
+        self.user_history += f"\n{historial_recortado}"
+        print("Historial actualizado:", self.user_history)
+
+            
+    # Función para enviar la información del caso a la API
+    def send_case_to_api(self,contexto, descripcion,escala):
+        api_url = "http://127.0.0.1:8000/casos/"
+        headers = {
+            "Content-Type": "application/json"
+        }
+        body = {
+            "contexto": contexto,
+            "descripcion": descripcion,
+            "escala":escala,
+        }
+
+        try:
+            response = requests.post(api_url, json=body, headers=headers)
+            if response.status_code == 200:
+                return {"status": "success", "message": "Caso enviado con éxito"}
+            else:
+                return {"status": "error", "message": "Error al enviar el caso", "details": response.text}
+        except Exception as e:
+            return {"status": "error", "message": "Excepción al enviar el caso", "details": str(e)}
+        
+        
+    # Nueva función para obtener información del backend
+    def get_casos_from_backend(self):
+        api_url = f"http://127.0.0.1:8000/casos/"
+        try:
+            response = requests.get(api_url)
+            if response.status_code == 200:
+                return response.json()  # Retornar los casos como un JSON
+            else:
+                return {"status": "error", "message": "Error al obtener casos", "details": response.text}
+        except Exception as e:
+            return {"status": "error", "message": "Excepción al obtener casos", "details": str(e)}
+
+    # Nueva función para eliminar toda la información de la base de datos
+    def delete_all_casos_from_backend(self):
+        api_url = "http://127.0.0.1:8000/casos/"
+        try:
+            response = requests.delete(api_url)
+            if response.status_code == 200:
+                return response.json()  # Mensaje de éxito
+            else:
+                return {"status": "error", "message": "Error al eliminar casos", "details": response.text}
+        except Exception as e:
+            return {"status": "error", "message": "Excepción al eliminar casos", "details": str(e)}
 
     

@@ -1,15 +1,18 @@
 from flask_smorest import Blueprint 
-from modelos.funcs import Nuevo_Caso , analizar_estado
+from modelos.funcs import Nuevo_Caso  , graph2
 from flask_cors import cross_origin
 from schemas.request_schemas import InitDialogueSchema, SendResponseSchema , NuevoCaso
 from modelos.llm import Dialogue, CustomAgent
 from modelos.documents import Document
-from flask import jsonify, render_template, request, jsonify, Response , redirect , url_for
+from flask import jsonify, render_template, request, jsonify, Response , redirect , url_for , session
 import re
 from casos.models import Caso, db , Antecedentes
 import json
 import asyncio
 import datetime
+import os
+import re
+
 
 
 conversation_agent = CustomAgent()
@@ -232,6 +235,31 @@ It is very important that you normalize those emotional reactions that, although
             return redirect(url_for('panel.f'))
 
         self.llm_bp.append(simple_page)
+        
+        
+    
+    
+    def guarda_audio(self):
+        simple_page = Blueprint("guardar_audio", __name__)
+
+        @simple_page.route("/upload-audio", methods=["POST"])
+        @cross_origin()
+
+        def f():
+            if "audioFile" not in request.files:
+                return jsonify({"error": "No file part"}), 400
+            
+            file = request.files["audioFile"]
+            UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploaded_audios")
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            if file.filename == "":
+                return jsonify({"error": "No selected file"}), 400
+
+            # Guarda el archivo en el directorio especificado
+            file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+            file.save(file_path)
+            return jsonify({"message": "File saved successfully", "file_path": file_path}), 200
+        self.llm_bp.append(simple_page)
 
 
     def sendResponse(self):
@@ -245,39 +273,173 @@ It is very important that you normalize those emotional reactions that, although
 
             msg = request.json["response"]
             response = None
+            
 
             # Verifica si han pasado los 5, 10 o 40 minutos para preguntar cómo se siente el paciente
             if dif > datetime.timedelta(minutes=40):
                 return jsonify({"response": {"speaker": "", "text": "El tiempo ha finalizado"}})
-            elif dif > datetime.timedelta(minutes=10):
-                # Pregunta cómo se siente el paciente
+            
+            if dif > datetime.timedelta(minutes=5):
+                # Respuesta estándar si no ha transcurrido mucho tiempo
+                response = self.dialogue.getNextResponse(doctor_answer=msg)
+                caso = self.dialogue.get_casos_from_backend()
+                historial = self.dialogue.getUserHistory()
                 r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
-                emotion = analizar_estado(r)
+                print(r)
+                # Expresión regular para encontrar todos los textos
+                
 
-                # Actualiza el estado emocional del paciente
-                if emotion == "positivo":
-                    self.dialogue.patient_params["descripcion_personaje"] += " Te sientes más calmado respecto al evento traumático."
-                elif emotion == "negativo":
-                    self.dialogue.patient_params["descripcion_personaje"] += " Te sientes peor porque no se está prestando atención a tu situación."
-                elif emotion == "neutral":
-                    self.dialogue.patient_params["descripcion_personaje"] += " Te sientes igual y no percibes cambios en la conversación."
+                # Verifica si r es un diccionario y contiene una clave "text"
+                if isinstance(r, dict) and "text" in r:
+                    ultimo_texto = r["text"]
+                    print("Último texto:", ultimo_texto)
+                else:
+                    print("El formato de la respuesta no es el esperado:", r)
+                # Divide el texto y conserva solo la parte que sigue a la frase específica
+                punto = "This is the current conversation:"
+                partes = historial.split(punto)
 
-                # Genera la siguiente respuesta
+                # Si la frase se encuentra en el texto, 'partes' tendrá al menos dos elementos
+                if len(partes) > 1:
+                    # Agregar un salto de línea antes de la frase
+                    historial_recortado = "\n" + punto + partes[1]  # Concatenar con un salto de línea
+                else:
+                    historial_recortado = historial  # Si no se encuentra la frase, usar el texto completo
+
+                print("Historial recortado:", historial_recortado)
+
+                print(caso)
+                contexto=caso[0]['contexto']
+                # Agregar más texto al final
+                escalas=caso[0]['escala']
+                descripcion=caso[0]['descripcion']
+                
+                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas)]})
+
+                # Obtener el último mensaje de 'messages'
+                ultimo_mensaje = resultado2['resultado_final'][-1].content
+                analisis_final=resultado2['analisis'][-1].content
+                print(analisis_final)
+                # Verificar y extraer datos de resultado2
+                if resultado2.get('resultado_final') and resultado2['resultado_final'][-1]:
+                    ultimo_mensaje = resultado2['resultado_final'][-1].content
+                else:
+                    raise ValueError("Error: resultado_final no tiene el formato esperado.")
+
+                if resultado2.get('analisis') and resultado2['analisis'][-1]:
+                    analisis_final = resultado2['analisis'][-1].content.strip()
+                else:
+                    raise ValueError("Error: analisis no tiene el formato esperado.")
+
+                # Actualizar escalas según analisis_final
+                if analisis_final == "neutral":
+                    pass  # Escala permanece igual
+                elif analisis_final == "positivo" and escalas < 5:
+                    escalas += 1
+                elif analisis_final == "negativo" and escalas > 0:
+                    escalas -= 1
+                else:
+                    print("Análisis desconocido:", analisis_final)
+                
+                print(escalas)
+                
+                patient_params = {
+                    "contexto_para_participantes": ultimo_mensaje,
+                    "descripcion_personaje": descripcion,
+                }
+                print(patient_params)
+                
+                self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params)
+                self.eliminar_caso=self.dialogue.delete_all_casos_from_backend()
+                self.send_response = self.dialogue.send_case_to_api(
+                    contexto=ultimo_mensaje,
+                    descripcion=descripcion,
+                    escala=escalas
+                )
+                self.nuevoHistorial = self.dialogue.addHistory(historial_recortado)
+                return jsonify({"response": response}), 200
+            
+            if dif > datetime.timedelta(minutes=10):
+                
+                # Respuesta estándar si no ha transcurrido mucho tiempo
                 response = self.dialogue.getNextResponse(doctor_answer=msg)
-            elif dif > datetime.timedelta(minutes=5):
-                r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido en esta conversación?")
-                emotion = analizar_estado(r)
+                caso = self.dialogue.get_casos_from_backend()
+                historial = self.dialogue.getUserHistory()
+                r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
+                print(r)
+                # Expresión regular para encontrar todos los textos
+                
 
-                # Actualiza el estado emocional basado en el análisis de la emoción
-                if emotion == "positivo":
-                    self.dialogue.patient_params["descripcion_personaje"] += " Te sientes un poco mejor con la charla."
-                elif emotion == "negativo":
-                    self.dialogue.patient_params["descripcion_personaje"] += " Te sientes peor porque la charla no te está ayudando."
-                elif emotion == "neutral":
-                    self.dialogue.patient_params["descripcion_personaje"] += " Te sientes igual que al inicio de la conversación."
+                # Verifica si r es un diccionario y contiene una clave "text"
+                if isinstance(r, dict) and "text" in r:
+                    ultimo_texto = r["text"]
+                    print("Último texto:", ultimo_texto)
+                else:
+                    print("El formato de la respuesta no es el esperado:", r)
+                # Divide el texto y conserva solo la parte que sigue a la frase específica
+                punto = "This is the current conversation:"
+                partes = historial.split(punto)
 
-                # Genera la siguiente respuesta
-                response = self.dialogue.getNextResponse(doctor_answer=msg)
+                # Si la frase se encuentra en el texto, 'partes' tendrá al menos dos elementos
+                if len(partes) > 1:
+                    # Agregar un salto de línea antes de la frase
+                    historial_recortado = "\n" + punto + partes[1]  # Concatenar con un salto de línea
+                else:
+                    historial_recortado = historial  # Si no se encuentra la frase, usar el texto completo
+
+                print("Historial recortado:", historial_recortado)
+
+                print(caso)
+                contexto=caso[0]['contexto']
+                # Agregar más texto al final
+                escalas=caso[0]['escala']
+                descripcion=caso[0]['descripcion']
+                
+                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas)]})
+
+                # Obtener el último mensaje de 'messages'
+                ultimo_mensaje = resultado2['resultado_final'][-1].content
+                analisis_final=resultado2['analisis'][-1].content
+                print(analisis_final)
+                # Verificar y extraer datos de resultado2
+                if resultado2.get('resultado_final') and resultado2['resultado_final'][-1]:
+                    ultimo_mensaje = resultado2['resultado_final'][-1].content
+                else:
+                    raise ValueError("Error: resultado_final no tiene el formato esperado.")
+
+                if resultado2.get('analisis') and resultado2['analisis'][-1]:
+                    analisis_final = resultado2['analisis'][-1].content.strip()
+                else:
+                    raise ValueError("Error: analisis no tiene el formato esperado.")
+
+                # Actualizar escalas según analisis_final
+                if analisis_final == "neutral":
+                    pass  # Escala permanece igual
+                elif analisis_final == "positivo" and escalas < 5:
+                    escalas += 1
+                elif analisis_final == "negativo" and escalas > 0:
+                    escalas -= 1
+                else:
+                    print("Análisis desconocido:", analisis_final)
+                
+                print(escalas)
+                
+                patient_params = {
+                    "contexto_para_participantes": ultimo_mensaje,
+                    "descripcion_personaje": descripcion,
+                }
+                print(patient_params)
+                
+                self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params)
+                self.eliminar_caso=self.dialogue.delete_all_casos_from_backend()
+                self.send_response = self.dialogue.send_case_to_api(
+                    contexto=ultimo_mensaje,
+                    descripcion=descripcion,
+                    escala=escalas
+                )
+                self.nuevoHistorial = self.dialogue.addHistory(historial_recortado)
+                return jsonify({"response": response}), 200
+            
             else:
                 # Respuesta estándar si no ha transcurrido mucho tiempo
                 response = self.dialogue.getNextResponse(doctor_answer=msg)
@@ -288,10 +450,10 @@ It is very important that you normalize those emotional reactions that, although
 
 
 
+    
 
-
+    # Actualización de initDialogue para enviar la información del caso
     def initDialogue(self):
-        
         simple_page = Blueprint("initDialogue", __name__)
 
         @simple_page.route("/initDialogue", methods=["POST"])
@@ -300,18 +462,35 @@ It is very important that you normalize those emotional reactions that, although
         def f(args):
             self.init_time = datetime.datetime.now()
             template = args["template"]
+
+            # Buscar el caso en la base de datos
             caso = Caso.query.filter_by(nombre=template).first()
+            
+
             if caso:
                 patient_params = {
                     "contexto_para_participantes": caso.situacion_problema,
                     "descripcion_personaje": caso.caracteristicas_de_la_persona
                 }
+
+                
+                # Crear una nueva instancia del diálogo
                 self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params)
+                # Llamar al método send_case_to_api usando la instancia del diálogo
+                self.eliminar_caso=self.dialogue.delete_all_casos_from_backend()
+                self.send_response = self.dialogue.send_case_to_api(
+                    contexto=caso.situacion_problema,
+                    descripcion=caso.caracteristicas_de_la_persona,
+                    escala=1,
+                )
+
                 return jsonify({"response": "Diálogo iniciado con éxito"}), 200
+
             return jsonify({"error": "Caso no encontrado"}), 404
 
         self.llm_bp.append(simple_page)
         print(f"Blueprint created: {simple_page.name} for /initDialogue")
+
         
         
     def getCaseInfo(self):
@@ -429,5 +608,6 @@ It is very important that you normalize those emotional reactions that, although
         self.getFeedback()
         self.endInteraction()
         self.chatbot()
+        self.guarda_audio()
         print("Blueprints created:", [bp.name for bp in self.llm_bp])  # Print the names of blueprints
         return self.llm_bp

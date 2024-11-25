@@ -16,7 +16,7 @@ project_id = os.getenv('project_id')
 
 
 llama_3_model = WatsonxLLM(
-    model_id="meta-llama/llama-3-1-70b-instruct",
+    model_id="meta-llama/llama-3-70b-instruct",
     url="https://us-south.ml.cloud.ibm.com",
     apikey=apikey,
     project_id=project_id,
@@ -32,7 +32,7 @@ llama_3_model = WatsonxLLM(
     )
 
 
-def analizar_estado(respuesta:str):
+def analizar_estado_2(respuesta:str):
 
     generate_prompt = PromptTemplate(
         template="""
@@ -41,7 +41,7 @@ def analizar_estado(respuesta:str):
 
         <|start_header_id|>system<|end_header_id|>
         You are a nice AI assistant, who has a task which is to analyze the response of a patient regarding how he feels during the conversation with the doctor, you must classify the response of the model in positive, negative or neutral.
-        So only in your answer you must return one of the following 3 alternatives: positivo, negativo or neutral. 
+        So only in your answer you must return one of the following 3 alternatives: positivo, negativo or neutral.
         <|eot_id|>
 
         <|start_header_id|>user<|end_header_id|>
@@ -62,6 +62,128 @@ def analizar_estado(respuesta:str):
     resultado=analizar.invoke({"respuesta":respuesta})
     #print(resultado)
     return resultado
+
+
+
+def transformar_caso(respuesta:str , nivel:str,escala:str):
+
+    generate_prompt = PromptTemplate(
+        template="""
+
+        <|begin_of_text|>
+
+        <|start_header_id|>system<|end_header_id|>
+        Instructions:
+        You are a friendly AI assistant. Your task is to transform the emotions present in the patient's current case according to the level of progress during the conversation with the doctor, using the emotion scale.
+        Identify the emotions in the current case.
+        if the progress is neutral, return the case without any change
+        If the progress is positive, replace the emotions with those of the next level on the scale.
+        If the progress is negative, move the emotions back to the previous level on the scale.
+        If the current level is 1 and progress is negative, or if the level is 5 and progress is positive, return the case with no change.
+        In your answer, return only the transformed text or the same text as appropriate, in English, without additional explanations or comments, and use the examples only to guide your answer and nothing else.        emotion scale:
+         1.Pain and Denial:
+          Emotions: Deep sadness, denial, feeling of unreality.
+          Description: The person may avoid thinking about what happened or feel paralyzed by emotional pain.
+        2. Anger and guilt:
+          Emotions: Frustration, anger, guilt or shame.
+          Description: Intense emotions related to the injustice or helplessness of the situation are manifested.
+        3. Sadness and Initial Acceptance:
+          Emotions: Melancholy, hopelessness, slight acceptance.
+          Description: The person begins to recognize the reality of the event, but continues to deal with negative emotions.
+        4. Adaptation and Reconstruction:
+          Emotions: Curiosity to get better, small glimmers of hope.
+          Description: Strategies to manage grief, such as seeking social support or therapy, begin to develop.
+        5. Growth and Resilience:
+          Emotions: Optimism, strength, genuine acceptance.
+          Description: Person finds meaning in experience, developing new skills and becoming emotionally stronger.
+        examples :
+          caso del paciente:On the evening of March 15, Diana recalled how she faced an extremely difficult situation in her life. 
+                            Although she initially felt paralyzed and vulnerable, over time she has reflected on that moment with a new perspective. 
+                            She now feels grateful that she was physically unharmed and is proud of the strength she has found in herself to overcome fear.
+                            Diana has worked on rebuilding her confidence and sense of security, implementing measures that allow her to feel safe in her home. 
+                            Although she recognizes that what happened was a traumatic event, she no longer lives it as something that defines her, but rather as an experience that has made her more resilient and more appreciative of her well-being and that of those around her.
+          nivel de progreso del paciente:positivo
+          nivel de la escala de emociones actual:5
+          Answer:On the evening of March 15, Diana recalled how she faced an extremely difficult situation in her life. 
+              Although she initially felt paralyzed and vulnerable, over time she has reflected on that moment with a new perspective. 
+              She now feels grateful that she was physically unharmed and is proud of the strength she has found in herself to overcome fear.
+              Diana has worked on rebuilding her confidence and sense of security, implementing measures that allow her to feel safe in her home. 
+              Although she recognizes that what happened was a traumatic event, she no longer lives it as something that defines her, but rather as an experience that has made her more resilient and more appreciative of her well-being and that of those around her.
+
+        <|eot_id|>
+
+        <|start_header_id|>user<|end_header_id|>
+
+        caso del paciente:{respuesta}
+        nivel de progreso del paciente:{nivel}
+        nivel de la escala de emociones actual:{escala}
+        Answer:
+
+        <|eot_id|>
+
+        <|start_header_id|>assistant<|end_header_id|>""",
+        input_variables=["respuesta" , "nivel","escala"],
+    )
+
+    # Chain
+    transformar_caso = generate_prompt | llama_3_model | StrOutputParser()
+
+
+    resultado=transformar_caso.invoke({"respuesta":respuesta , "nivel":nivel , "escala":escala})
+    
+    return resultado
+
+
+from typing_extensions import TypedDict
+from langgraph.graph import StateGraph
+from langgraph.graph.message import add_messages
+from typing import Annotated
+
+from langgraph.graph import StateGraph, START, END
+
+
+class State(TypedDict):
+    # Messages have the type "list". The `add_messages` function
+    # in the annotation defines how this state key should be updated
+    # (in this case, it appends messages to the list, rather than overwriting them)
+    analisis:Annotated[list, add_messages]
+    caso: Annotated[list, add_messages]
+    nivel:Annotated[list, add_messages]
+    escala:Annotated[list, add_messages]
+    resultado_final:Annotated[list, add_messages]
+
+
+graph_builder = StateGraph(State)
+
+def analizar(state: State):
+
+    analisis = state["analisis"]
+    print(analisis)
+
+    return {"analisis": [analizar_estado_2(analisis)]}
+
+
+def transformar(state: State):
+
+    analisis = state["analisis"]
+    print(analisis)
+    caso = state["caso"]
+    escala = state["escala"]
+    resultado = transformar_caso( caso, analisis, escala)
+
+    return {"resultado_final": [resultado]}
+
+
+
+graph_builder.add_node("analizar", analizar)
+graph_builder.add_node("transformar", transformar)
+
+graph_builder.add_edge(START, "analizar")
+
+graph_builder.add_edge("analizar", "transformar")
+graph_builder.add_edge("transformar", END)
+
+graph2 = graph_builder.compile()
 
 def Nuevo_Caso(antecedentes:str , fecha:str):
 
