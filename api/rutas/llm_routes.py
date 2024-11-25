@@ -440,6 +440,251 @@ It is very important that you normalize those emotional reactions that, although
                 self.nuevoHistorial = self.dialogue.addHistory(historial_recortado)
                 return jsonify({"response": response}), 200
             
+            
+            if dif > datetime.timedelta(minutes=15):
+                
+                # Respuesta estándar si no ha transcurrido mucho tiempo
+                response = self.dialogue.getNextResponse(doctor_answer=msg)
+                caso = self.dialogue.get_casos_from_backend()
+                historial = self.dialogue.getUserHistory()
+                r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
+                print(r)
+                # Expresión regular para encontrar todos los textos
+                
+
+                # Verifica si r es un diccionario y contiene una clave "text"
+                if isinstance(r, dict) and "text" in r:
+                    ultimo_texto = r["text"]
+                    print("Último texto:", ultimo_texto)
+                else:
+                    print("El formato de la respuesta no es el esperado:", r)
+                # Divide el texto y conserva solo la parte que sigue a la frase específica
+                punto = "This is the current conversation:"
+                partes = historial.split(punto)
+
+                # Si la frase se encuentra en el texto, 'partes' tendrá al menos dos elementos
+                if len(partes) > 1:
+                    # Agregar un salto de línea antes de la frase
+                    historial_recortado = "\n" + punto + partes[1]  # Concatenar con un salto de línea
+                else:
+                    historial_recortado = historial  # Si no se encuentra la frase, usar el texto completo
+
+                print("Historial recortado:", historial_recortado)
+
+                print(caso)
+                contexto=caso[0]['contexto']
+                # Agregar más texto al final
+                escalas=caso[0]['escala']
+                descripcion=caso[0]['descripcion']
+                
+                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas)]})
+
+                # Obtener el último mensaje de 'messages'
+                ultimo_mensaje = resultado2['resultado_final'][-1].content
+                analisis_final=resultado2['analisis'][-1].content
+                print(analisis_final)
+                # Verificar y extraer datos de resultado2
+                if resultado2.get('resultado_final') and resultado2['resultado_final'][-1]:
+                    ultimo_mensaje = resultado2['resultado_final'][-1].content
+                else:
+                    raise ValueError("Error: resultado_final no tiene el formato esperado.")
+
+                if resultado2.get('analisis') and resultado2['analisis'][-1]:
+                    analisis_final = resultado2['analisis'][-1].content.strip()
+                else:
+                    raise ValueError("Error: analisis no tiene el formato esperado.")
+
+                # Actualizar escalas según analisis_final
+                if analisis_final == "neutral":
+                    pass  # Escala permanece igual
+                elif analisis_final == "positivo" and escalas < 5:
+                    escalas += 1
+                elif analisis_final == "negativo" and escalas > 0:
+                    escalas -= 1
+                else:
+                    print("Análisis desconocido:", analisis_final)
+                
+                print(escalas)
+                
+                patient_params = {
+                    "contexto_para_participantes": ultimo_mensaje,
+                    "descripcion_personaje": descripcion,
+                }
+                print(patient_params)
+                
+                self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params)
+                self.eliminar_caso=self.dialogue.delete_all_casos_from_backend()
+                self.send_response = self.dialogue.send_case_to_api(
+                    contexto=ultimo_mensaje,
+                    descripcion=descripcion,
+                    escala=escalas
+                )
+                self.nuevoHistorial = self.dialogue.addHistory(historial_recortado)
+                return jsonify({"response": response}), 200
+            
+            if dif > datetime.timedelta(minutes=20):
+                
+                # Respuesta estándar si no ha transcurrido mucho tiempo
+                response = self.dialogue.getNextResponse(doctor_answer=msg)
+                caso = self.dialogue.get_casos_from_backend()
+                historial = self.dialogue.getUserHistory()
+                r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
+                print(r)
+                # Expresión regular para encontrar todos los textos
+                
+
+                # Verifica si r es un diccionario y contiene una clave "text"
+                if isinstance(r, dict) and "text" in r:
+                    ultimo_texto = r["text"]
+                    print("Último texto:", ultimo_texto)
+                else:
+                    print("El formato de la respuesta no es el esperado:", r)
+                # Divide el texto y conserva solo la parte que sigue a la frase específica
+                punto = "This is the current conversation:"
+                partes = historial.split(punto)
+
+                # Si la frase se encuentra en el texto, 'partes' tendrá al menos dos elementos
+                if len(partes) > 1:
+                    # Agregar un salto de línea antes de la frase
+                    historial_recortado = "\n" + punto + partes[1]  # Concatenar con un salto de línea
+                else:
+                    historial_recortado = historial  # Si no se encuentra la frase, usar el texto completo
+
+                print("Historial recortado:", historial_recortado)
+
+                print(caso)
+                contexto=caso[0]['contexto']
+                # Agregar más texto al final
+                escalas=caso[0]['escala']
+                descripcion=caso[0]['descripcion']
+                
+                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas)]})
+
+                # Obtener el último mensaje de 'messages'
+                ultimo_mensaje = resultado2['resultado_final'][-1].content
+                analisis_final=resultado2['analisis'][-1].content
+                print(analisis_final)
+                # Verificar y extraer datos de resultado2
+                if resultado2.get('resultado_final') and resultado2['resultado_final'][-1]:
+                    ultimo_mensaje = resultado2['resultado_final'][-1].content
+                else:
+                    raise ValueError("Error: resultado_final no tiene el formato esperado.")
+
+                if resultado2.get('analisis') and resultado2['analisis'][-1]:
+                    analisis_final = resultado2['analisis'][-1].content.strip()
+                else:
+                    raise ValueError("Error: analisis no tiene el formato esperado.")
+
+                # Actualizar escalas según analisis_final
+                if analisis_final == "neutral":
+                    pass  # Escala permanece igual
+                elif analisis_final == "positivo" and escalas < 5:
+                    escalas += 1
+                elif analisis_final == "negativo" and escalas > 0:
+                    escalas -= 1
+                else:
+                    print("Análisis desconocido:", analisis_final)
+                
+                print(escalas)
+                
+                patient_params = {
+                    "contexto_para_participantes": ultimo_mensaje,
+                    "descripcion_personaje": descripcion,
+                }
+                print(patient_params)
+                
+                self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params)
+                self.eliminar_caso=self.dialogue.delete_all_casos_from_backend()
+                self.send_response = self.dialogue.send_case_to_api(
+                    contexto=ultimo_mensaje,
+                    descripcion=descripcion,
+                    escala=escalas
+                )
+                self.nuevoHistorial = self.dialogue.addHistory(historial_recortado)
+                return jsonify({"response": response}), 200
+            
+            
+            if dif > datetime.timedelta(minutes=25):
+                
+                # Respuesta estándar si no ha transcurrido mucho tiempo
+                response = self.dialogue.getNextResponse(doctor_answer=msg)
+                caso = self.dialogue.get_casos_from_backend()
+                historial = self.dialogue.getUserHistory()
+                r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
+                print(r)
+                # Expresión regular para encontrar todos los textos
+                
+
+                # Verifica si r es un diccionario y contiene una clave "text"
+                if isinstance(r, dict) and "text" in r:
+                    ultimo_texto = r["text"]
+                    print("Último texto:", ultimo_texto)
+                else:
+                    print("El formato de la respuesta no es el esperado:", r)
+                # Divide el texto y conserva solo la parte que sigue a la frase específica
+                punto = "This is the current conversation:"
+                partes = historial.split(punto)
+
+                # Si la frase se encuentra en el texto, 'partes' tendrá al menos dos elementos
+                if len(partes) > 1:
+                    # Agregar un salto de línea antes de la frase
+                    historial_recortado = "\n" + punto + partes[1]  # Concatenar con un salto de línea
+                else:
+                    historial_recortado = historial  # Si no se encuentra la frase, usar el texto completo
+
+                print("Historial recortado:", historial_recortado)
+
+                print(caso)
+                contexto=caso[0]['contexto']
+                # Agregar más texto al final
+                escalas=caso[0]['escala']
+                descripcion=caso[0]['descripcion']
+                
+                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas)]})
+
+                # Obtener el último mensaje de 'messages'
+                ultimo_mensaje = resultado2['resultado_final'][-1].content
+                analisis_final=resultado2['analisis'][-1].content
+                print(analisis_final)
+                # Verificar y extraer datos de resultado2
+                if resultado2.get('resultado_final') and resultado2['resultado_final'][-1]:
+                    ultimo_mensaje = resultado2['resultado_final'][-1].content
+                else:
+                    raise ValueError("Error: resultado_final no tiene el formato esperado.")
+
+                if resultado2.get('analisis') and resultado2['analisis'][-1]:
+                    analisis_final = resultado2['analisis'][-1].content.strip()
+                else:
+                    raise ValueError("Error: analisis no tiene el formato esperado.")
+
+                # Actualizar escalas según analisis_final
+                if analisis_final == "neutral":
+                    pass  # Escala permanece igual
+                elif analisis_final == "positivo" and escalas < 5:
+                    escalas += 1
+                elif analisis_final == "negativo" and escalas > 0:
+                    escalas -= 1
+                else:
+                    print("Análisis desconocido:", analisis_final)
+                
+                print(escalas)
+                
+                patient_params = {
+                    "contexto_para_participantes": ultimo_mensaje,
+                    "descripcion_personaje": descripcion,
+                }
+                print(patient_params)
+                
+                self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params)
+                self.eliminar_caso=self.dialogue.delete_all_casos_from_backend()
+                self.send_response = self.dialogue.send_case_to_api(
+                    contexto=ultimo_mensaje,
+                    descripcion=descripcion,
+                    escala=escalas
+                )
+                self.nuevoHistorial = self.dialogue.addHistory(historial_recortado)
+                return jsonify({"response": response}), 200
+            
             else:
                 # Respuesta estándar si no ha transcurrido mucho tiempo
                 response = self.dialogue.getNextResponse(doctor_answer=msg)
