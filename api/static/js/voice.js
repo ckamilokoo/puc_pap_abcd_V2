@@ -72,7 +72,7 @@ function invokeSTT(blob) {
   let myHeaders = new Headers();
   myHeaders.append(
     "Authorization",
-    "Basic YupsAeND4d0MTJjaHUWeDyFnAsZlT4ddnhZMuRFDAVUm"
+    "Basic YXBpa2V5Oll1cHNBZU5ENGQwTVRKamFIVVdlRHlGbkFzWmxUNGRkbmhaTXVSRkRBVlVt"
   );
   myHeaders.append("Content-Type", "audio/wav");
   let requestOptions = {
@@ -83,7 +83,7 @@ function invokeSTT(blob) {
   };
 
   const baseUrl = new URL(
-    "https://api.us-south.speech-to-text.watson.cloud.ibm.com/instances/ef7be3c6-c3f9-4f42-8389-23ed6e468b66/v1/recognize?model=en-US_Multimedia&background_audio_suppression=0.3"
+    "https://api.us-south.speech-to-text.watson.cloud.ibm.com/instances/ef7be3c6-c3f9-4f42-8389-23ed6e468b66/v1/recognize?model=es-LA_Telephony&background_audio_suppression=0.3"
   );
 
   fetch(baseUrl.href, requestOptions)
@@ -106,7 +106,7 @@ async function preReceiveHandler(event) {
 }
 
 window.watsonAssistantChatOptions = {
-  integrationID: "0636de83-7a60-49a6-af98-de78c4e341c1", // The ID of this integration.
+  integrationID: "b30166c3-cbb9-4245-a645-59c50a69c58f", // The ID of this integration.
   region: "us-south", // The region your integration is hosted in.
   serviceInstanceID: "d74071f8-3574-4894-bb15-cf419fc89077", // The ID of your service instance.
   onLoad: function (instance) {
@@ -154,7 +154,7 @@ async function playAudio(text2speechContent) {
   var host = window.location.protocol + "//" + window.location.host;
   myHeaders.append(
     "Authorization",
-    "Basic YXBpa2V5OmJLb3hzb1Vhd05IZF9hUW1LdVV3RTdUNF9aZW5qZExGWWxWS21LenhKMFU1"
+    "Basic YXBpa2V5OndpODdVX1R4RmMyenU5Z3ZFT2V2WGozOFRVc24tdWM3OFpjSjdoLVZTZklC"
   );
   //myHeaders.append("Access-Control-Allow-Origin", host);
 
@@ -165,10 +165,10 @@ async function playAudio(text2speechContent) {
   };
 
   const baseUrl = new URL(
-    "https://api.us-south.text-to-speech.watson.cloud.ibm.com/instances/bc169411-2396-4664-bc78-3368a70ca647/v1/synthesize"
+    "https://api.us-south.text-to-speech.watson.cloud.ibm.com/instances/e423d1f9-4bd1-49e2-a163-51f61c13c832/v1/synthesize"
   );
   baseUrl.searchParams.append("accept", "audio/mp3");
-  baseUrl.searchParams.append("voice", "es-LA_SofiaV3Voice");
+  baseUrl.searchParams.append("voice", "es-LA_DanielaExpressive");
   baseUrl.searchParams.append("text", text2speechContent);
 
   await fetch(baseUrl.href, requestOptions)
