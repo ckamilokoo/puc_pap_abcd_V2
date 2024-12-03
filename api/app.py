@@ -1,9 +1,9 @@
 from flask import Flask
 from flask_smorest import Api
-from rutas.llm_routes import LLM_Routes
-from config import ServerConfig
-from casos.models import db, Caso , Antecedentes
-from flask_session import Session
+from api.rutas.llm_routes import LLM_Routes
+from api.config import ServerConfig
+from api.casos.models import db, Caso , Antecedentes
+
 
 app = Flask(__name__)
 app.config.from_object(ServerConfig)
