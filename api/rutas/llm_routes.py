@@ -1,12 +1,12 @@
 from flask_smorest import Blueprint 
-from modelos.funcs import Nuevo_Caso  , graph2
+from api.modelos.funcs import Nuevo_Caso  , graph2
 from flask_cors import cross_origin
-from schemas.request_schemas import InitDialogueSchema, SendResponseSchema , NuevoCaso
-from modelos.llm import Dialogue, CustomAgent
-from modelos.documents import Document
+from api.schemas.request_schemas import InitDialogueSchema, SendResponseSchema , NuevoCaso
+from api.modelos.llm import Dialogue, CustomAgent
+from api.modelos.documents import Document
 from flask import jsonify, render_template, request, jsonify, Response , redirect , url_for , session
 import re
-from casos.models import Caso, db , Antecedentes
+from api.casos.models import Caso, db , Antecedentes
 import json
 import asyncio
 import datetime
