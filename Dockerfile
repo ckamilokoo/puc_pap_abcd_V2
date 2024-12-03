@@ -19,5 +19,5 @@ COPY api/ ./api/
 RUN pip install --no-cache -r requirements.txt
 
 # Comando para ejecutar la aplicación
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "api.app:app"]
+CMD ["python", "./api/app.py"]
 
