@@ -142,7 +142,7 @@ class Dialogue:
             
     # Función para enviar la información del caso a la API
     def send_case_to_api(self,contexto, descripcion,escala):
-        api_url = "http://127.0.0.1:8000/casos/"
+        api_url = os.getenv("Segundo_Backend")
         headers = {
             "Content-Type": "application/json"
         }
@@ -164,7 +164,7 @@ class Dialogue:
         
     # Nueva función para obtener información del backend
     def get_casos_from_backend(self):
-        api_url = f"http://127.0.0.1:8000/casos/"
+        api_url = os.getenv("Segundo_Backend")
         try:
             response = requests.get(api_url)
             if response.status_code == 200:
@@ -176,7 +176,7 @@ class Dialogue:
 
     # Nueva función para eliminar toda la información de la base de datos
     def delete_all_casos_from_backend(self):
-        api_url = "http://127.0.0.1:8000/casos/"
+        api_url = os.getenv("Segundo_Backend")
         try:
             response = requests.delete(api_url)
             if response.status_code == 200:

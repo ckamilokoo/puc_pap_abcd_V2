@@ -312,6 +312,9 @@ It is very important that you normalize those emotional reactions that, although
                 contexto=caso[0]['contexto']
                 # Agregar más texto al final
                 escalas=caso[0]['escala']
+                print(type(escalas))
+                escalas_string = str(escalas)
+                print(type(escalas_string))
                 descripcion=caso[0]['descripcion']
                 
                 resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas)]})
@@ -393,9 +396,11 @@ It is very important that you normalize those emotional reactions that, although
                 contexto=caso[0]['contexto']
                 # Agregar más texto al final
                 escalas=caso[0]['escala']
+                type(escalas)
+                escalas_string = str(escalas)
                 descripcion=caso[0]['descripcion']
                 
-                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas)]})
+                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas_string)]})
 
                 # Obtener el último mensaje de 'messages'
                 ultimo_mensaje = resultado2['resultado_final'][-1].content
@@ -475,9 +480,11 @@ It is very important that you normalize those emotional reactions that, although
                 contexto=caso[0]['contexto']
                 # Agregar más texto al final
                 escalas=caso[0]['escala']
+                print(type(escalas))
+                escalas_string = str(escalas)
                 descripcion=caso[0]['descripcion']
                 
-                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas)]})
+                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas_string)]})
 
                 # Obtener el último mensaje de 'messages'
                 ultimo_mensaje = resultado2['resultado_final'][-1].content
@@ -556,9 +563,11 @@ It is very important that you normalize those emotional reactions that, although
                 contexto=caso[0]['contexto']
                 # Agregar más texto al final
                 escalas=caso[0]['escala']
+                type(escalas)
+                escalas_string = str(escalas)
                 descripcion=caso[0]['descripcion']
                 
-                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas)]})
+                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas_string)]})
 
                 # Obtener el último mensaje de 'messages'
                 ultimo_mensaje = resultado2['resultado_final'][-1].content
@@ -638,9 +647,11 @@ It is very important that you normalize those emotional reactions that, although
                 contexto=caso[0]['contexto']
                 # Agregar más texto al final
                 escalas=caso[0]['escala']
+                type(escalas)
+                escalas_string = str(escalas)
                 descripcion=caso[0]['descripcion']
                 
-                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas)]})
+                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas_string)]})
 
                 # Obtener el último mensaje de 'messages'
                 ultimo_mensaje = resultado2['resultado_final'][-1].content
