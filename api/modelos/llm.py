@@ -138,6 +138,7 @@ class Dialogue:
         """Añade un historial recortado al historial del usuario."""
         self.user_history += f"\n{historial_recortado}"
         print("Historial actualizado:", self.user_history)
+        return self.user_history
 
             
     # Función para enviar la información del caso a la API
