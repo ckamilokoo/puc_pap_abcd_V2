@@ -207,7 +207,7 @@ It is very important that you normalize those emotional reactions that, although
             db.session.add(antecedentes)
             db.session.commit()
             # Obtener la fecha actual
-            fecha_actual = datetime.now().strftime("%d/%m/%Y")
+            fecha_actual = datetime.datetime.now().strftime("%d/%m/%Y")
             antecedentes_str = ", ".join([f"{key}={value}" for key, value in data.items()])
             response = Nuevo_Caso(antecedentes_str , fecha_actual)
 
@@ -279,10 +279,11 @@ It is very important that you normalize those emotional reactions that, although
             if dif > datetime.timedelta(minutes=40):
                 return jsonify({"response": {"speaker": "", "text": "El tiempo ha finalizado"}})
             
-            if dif > datetime.timedelta(minutes=4):
+            if dif > datetime.timedelta(minutes=1):
                 # Respuesta estándar si no ha transcurrido mucho tiempo
                 response = self.dialogue.getNextResponse(doctor_answer=msg)
                 caso = self.dialogue.get_casos_from_backend()
+                print(caso)
                 historial = self.dialogue.getUserHistory()
                 r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
                 print(r)
@@ -339,7 +340,7 @@ It is very important that you normalize those emotional reactions that, although
                     pass  # Escala permanece igual
                 elif analisis_final == "positivo" and escalas < 5:
                     escalas += 1
-                elif analisis_final == "negativo" and escalas > 0:
+                elif analisis_final == "negativo" and escalas > 1:
                     escalas -= 1
                 else:
                     print("Análisis desconocido:", analisis_final)
@@ -422,7 +423,7 @@ It is very important that you normalize those emotional reactions that, although
                     pass  # Escala permanece igual
                 elif analisis_final == "positivo" and escalas < 5:
                     escalas += 1
-                elif analisis_final == "negativo" and escalas > 0:
+                elif analisis_final == "negativo" and escalas > 1:
                     escalas -= 1
                 else:
                     print("Análisis desconocido:", analisis_final)
@@ -506,7 +507,7 @@ It is very important that you normalize those emotional reactions that, although
                     pass  # Escala permanece igual
                 elif analisis_final == "positivo" and escalas < 5:
                     escalas += 1
-                elif analisis_final == "negativo" and escalas > 0:
+                elif analisis_final == "negativo" and escalas > 1:
                     escalas -= 1
                 else:
                     print("Análisis desconocido:", analisis_final)
@@ -589,7 +590,7 @@ It is very important that you normalize those emotional reactions that, although
                     pass  # Escala permanece igual
                 elif analisis_final == "positivo" and escalas < 5:
                     escalas += 1
-                elif analisis_final == "negativo" and escalas > 0:
+                elif analisis_final == "negativo" and escalas > 1:
                     escalas -= 1
                 else:
                     print("Análisis desconocido:", analisis_final)
@@ -673,7 +674,7 @@ It is very important that you normalize those emotional reactions that, although
                     pass  # Escala permanece igual
                 elif analisis_final == "positivo" and escalas < 5:
                     escalas += 1
-                elif analisis_final == "negativo" and escalas > 0:
+                elif analisis_final == "negativo" and escalas > 1:
                     escalas -= 1
                 else:
                     print("Análisis desconocido:", analisis_final)
