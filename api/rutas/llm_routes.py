@@ -279,7 +279,7 @@ It is very important that you normalize those emotional reactions that, although
             if dif > datetime.timedelta(minutes=40):
                 return jsonify({"response": {"speaker": "", "text": "El tiempo ha finalizado"}})
             
-            if dif > datetime.timedelta(minutes=5):
+            if dif > datetime.timedelta(minutes=4):
                 # Respuesta estándar si no ha transcurrido mucho tiempo
                 response = self.dialogue.getNextResponse(doctor_answer=msg)
                 caso = self.dialogue.get_casos_from_backend()
@@ -317,7 +317,7 @@ It is very important that you normalize those emotional reactions that, although
                 print(type(escalas_string))
                 descripcion=caso[0]['descripcion']
                 
-                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas)]})
+                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas_string)]})
 
                 # Obtener el último mensaje de 'messages'
                 ultimo_mensaje = resultado2['resultado_final'][-1].content
