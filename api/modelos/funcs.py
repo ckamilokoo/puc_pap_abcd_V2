@@ -64,6 +64,62 @@ def analizar_estado_2(respuesta:str):
     return resultado
 
 
+def respuesta_final(caso_inicial:str , caso_final:str , escala_inicial:str , escala_final:str ):
+
+    generate_prompt = PromptTemplate(
+        template="""
+
+        <|begin_of_text|>
+
+        <|start_header_id|>system<|end_header_id|>
+        
+        Instructions:
+        You are a friendly artificial intelligence assistant who is impersonating a patient. Your task is to answer in first person how the patient felt at the beginning of the conversation with the doctor using “initial patient case” and “initial emotion scale level” and to complement the response of the patient's progress at the end of the conversation with the doctor using “final patient case” and “final emotion scale level”.
+        Your answers should always be in Spanish, in the first person as if you were asked how your emotional state progressed during the conversation with the doctor and never mention the scale of emotions itself, only the mood you had and in a maximum of 50 words.
+        scale of the progress of emotions that should only be used as a guide and nothing else.
+
+         1.Pain and Denial:
+          Emotions: Deep sadness, denial, feeling of unreality.
+          Description: The person may avoid thinking about what happened or feel paralyzed by emotional pain.
+        2. Anger and guilt:
+          Emotions: Frustration, anger, guilt or shame.
+          Description: Intense emotions related to the injustice or helplessness of the situation are manifested.
+        3. Sadness and Initial Acceptance:
+          Emotions: Melancholy, hopelessness, slight acceptance.
+          Description: The person begins to recognize the reality of the event, but continues to deal with negative emotions.
+        4. Adaptation and Reconstruction:
+          Emotions: Curiosity to get better, small glimmers of hope.
+          Description: Strategies to manage grief, such as seeking social support or therapy, begin to develop.
+        5. Growth and Resilience:
+          Emotions: Optimism, strength, genuine acceptance.
+          Description: Person finds meaning in experience, developing new skills and becoming emotionally stronger.
+
+        your answers should always be in Spanish and with a maximum of 50 words.
+        <|eot_id|>
+
+        <|start_header_id|>user<|end_header_id|>
+
+        caso del paciente inicial:{caso_inicial}
+        nivel de la escala de emociones inicial:{escala_inicial}
+        caso del paciente final:{caso_final}
+        nivel de la escala de emociones final:{escala_final}
+        Answer:
+
+        <|eot_id|>
+
+        <|start_header_id|>assistant<|end_header_id|>""",
+        input_variables=["caso_inicial" , "caso_inicial","caso_final","escala_final"],
+    )
+
+    # Chain
+    respuesta_final_1 = generate_prompt | llama_3_model | StrOutputParser()
+
+
+    resultado=respuesta_final_1.invoke({"caso_inicial": caso_inicial, "escala_inicial":escala_inicial , "caso_final": caso_final, "escala_final":escala_final })
+    #print(resultado)
+    return resultado
+
+
 
 def transformar_caso(respuesta:str , nivel:str,escala:str):
 
@@ -80,7 +136,7 @@ def transformar_caso(respuesta:str , nivel:str,escala:str):
         If the progress is positive, replace the emotions with those of the next level on the scale.
         If the progress is negative, move the emotions back to the previous level on the scale.
         If the current level is 1 and progress is negative, or if the level is 5 and progress is positive, return the case with no change.
-        In your answer, return only the transformed text or the same text as appropriate, in English, without additional explanations or comments, and use the examples only to guide your answer and nothing else.        emotion scale:
+        In your answer, return only the transformed text or the same text as appropriate, in spanish, without additional explanations or comments, and use the examples only to guide your answer and nothing else.        emotion scale:
          1.Pain and Denial:
           Emotions: Deep sadness, denial, feeling of unreality.
           Description: The person may avoid thinking about what happened or feel paralyzed by emotional pain.

@@ -1,5 +1,5 @@
 from flask_smorest import Blueprint 
-from modelos.funcs import Nuevo_Caso  , graph2
+from modelos.funcs import Nuevo_Caso  , graph2 , respuesta_final
 from flask_cors import cross_origin
 from schemas.request_schemas import InitDialogueSchema, SendResponseSchema , NuevoCaso
 from modelos.llm import Dialogue, CustomAgent
@@ -55,14 +55,27 @@ class LLM_Routes():
     current_time = None
     contador=0
     historial_final=""
+    caso_inicial=""
+    escala_inicial=""
+    caso_final=""
+    escala_final=""
+    
     
     def endInteraction(self):
         simple_page = Blueprint("endInteraction", __name__)
         @simple_page.route("/endInteraction", methods = ["GET"])
         @cross_origin()
         def f():
-            r = self.dialogue.getNextResponse(doctor_answer = "¿Cómo te has sentido teniendo esta conversación conmigo, te ayudó en algo?")
-            return jsonify({"response":r}), 200
+            r=respuesta_final(self.caso_inicial , self.caso_final , self.escala_inicial , self.escala_final)
+            # Ajustar el formato de la respuesta
+            response_data = {
+                "response": {
+                    "speaker": "IA",  # Puedes personalizar o parametrizar el speaker si es necesario
+                    "text": r  # El texto que retorna tu función
+                }
+            }
+            
+            return jsonify(response_data), 200
         self.llm_bp.append(simple_page)
     def getFeedback(self):
         simple_page = Blueprint("getFeedback", __name__)
@@ -186,7 +199,7 @@ It is very important that you normalize those emotional reactions that, although
             remember answer in spanish
             """)
             translated_response = traslator_agent.runAgent()
-            self.historial_final=""
+            
             return jsonify({"response": f"{translated_response}"}),200
         self.llm_bp.append(simple_page)
     def NuevoCaso(self):
@@ -291,6 +304,9 @@ It is very important that you normalize those emotional reactions that, although
                 historial = self.dialogue.getUserHistory()
                 print(historial)
                 r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
+                self.avance_1+= f"""
+                {r}
+                """
                 #print(r)
                 # Expresión regular para encontrar todos los textos
     
@@ -364,6 +380,10 @@ It is very important that you normalize those emotional reactions that, although
                 )
                 self.nuevoHistorial = self.dialogue.addHistory(self.historial_final)
                 print(self.dialogue.getUserHistory)
+                self.caso_final=""
+                self.escala_final=""
+                self.caso_final=ultimo_mensaje
+                self.escala_final=escalas_string
                 return jsonify({"response": response}), 200
             
             
@@ -375,6 +395,9 @@ It is very important that you normalize those emotional reactions that, although
                 #print(caso)
                 historial = self.dialogue.getUserHistory()
                 r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
+                self.avance_1+= f"""
+                {r}
+                """
                 #print(r)
                 # Expresión regular para encontrar todos los textos
                 
@@ -454,6 +477,10 @@ It is very important that you normalize those emotional reactions that, although
                 )
                 self.nuevoHistorial = self.dialogue.addHistory(self.historial_final)
                 print(self.dialogue.getUserHistory)
+                self.caso_final=""
+                self.escala_final=""
+                self.caso_final=ultimo_mensaje
+                self.escala_final=escalas_string
                 return jsonify({"response": response}), 200
             
             
@@ -464,6 +491,9 @@ It is very important that you normalize those emotional reactions that, although
                 caso = self.dialogue.get_casos_from_backend()
                 historial = self.dialogue.getUserHistory()
                 r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
+                self.avance_1+= f"""
+                {r}
+                """
                 print(r)
                 # Expresión regular para encontrar todos los textos
                 
@@ -540,16 +570,23 @@ It is very important that you normalize those emotional reactions that, although
                     escala=escalas
                 )
                 self.nuevoHistorial = self.dialogue.addHistory(self.historial_final)
+                self.caso_final=""
+                self.escala_final=""
+                self.caso_final=ultimo_mensaje
+                self.escala_final=escalas_string
                 return jsonify({"response": response}), 200
             
             
-            if dif > datetime.timedelta(minutes=4) and self.contador==1:    
+            if dif > datetime.timedelta(minutes=10) and self.contador==1:    
                 self.contador += 1
                 # Respuesta estándar si no ha transcurrido mucho tiempo
                 response = self.dialogue.getNextResponse(doctor_answer=msg)
                 caso = self.dialogue.get_casos_from_backend()
                 historial = self.dialogue.getUserHistory()
                 r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
+                self.avance_1+= f"""
+                {r}
+                """
                 print(r)
                 # Expresión regular para encontrar todos los textos
                 
@@ -627,16 +664,23 @@ It is very important that you normalize those emotional reactions that, although
                     escala=escalas
                 )
                 self.nuevoHistorial = self.dialogue.addHistory(self.historial_final)
+                self.caso_final=""
+                self.escala_final=""
+                self.caso_final=ultimo_mensaje
+                self.escala_final=escalas_string
                 return jsonify({"response": response}), 200
             
             
-            if dif > datetime.timedelta(minutes=2) and self.contador==0 :
+            if dif > datetime.timedelta(minutes=5) and self.contador==0 :
                 self.contador += 1
                 # Respuesta estándar si no ha transcurrido mucho tiempo
                 response = self.dialogue.getNextResponse(doctor_answer=msg)
                 caso = self.dialogue.get_casos_from_backend()
                 historial = self.dialogue.getUserHistory()
                 r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
+                self.avance_1+= f"""
+                {r}
+                """
                 print(r)
                 # Expresión regular para encontrar todos los textos
                 
@@ -713,6 +757,8 @@ It is very important that you normalize those emotional reactions that, although
                     escala=escalas
                 )
                 self.nuevoHistorial = self.dialogue.addHistory(self.historial_final)
+                self.caso_final=ultimo_mensaje
+                self.escala_final=escalas_string
                 return jsonify({"response": response}), 200
             
             
@@ -760,6 +806,8 @@ It is very important that you normalize those emotional reactions that, although
                     escala=1,
                 )
                 self.contador = 0
+                self.caso_inicial=contexto=caso.situacion_problema
+                self.escala_inicial="1"
                 return jsonify({"response": "Diálogo iniciado con éxito"}), 200
 
             return jsonify({"error": "Caso no encontrado"}), 404
