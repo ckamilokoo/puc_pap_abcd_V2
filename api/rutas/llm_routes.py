@@ -304,9 +304,7 @@ It is very important that you normalize those emotional reactions that, although
                 historial = self.dialogue.getUserHistory()
                 print(historial)
                 r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
-                self.avance_1+= f"""
-                {r}
-                """
+                
                 #print(r)
                 # Expresión regular para encontrar todos los textos
     
@@ -379,7 +377,7 @@ It is very important that you normalize those emotional reactions that, although
                     escala=escalas
                 )
                 self.nuevoHistorial = self.dialogue.addHistory(self.historial_final)
-                print(self.dialogue.getUserHistory)
+                
                 self.caso_final=""
                 self.escala_final=""
                 self.caso_final=ultimo_mensaje
@@ -395,9 +393,7 @@ It is very important that you normalize those emotional reactions that, although
                 #print(caso)
                 historial = self.dialogue.getUserHistory()
                 r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
-                self.avance_1+= f"""
-                {r}
-                """
+                
                 #print(r)
                 # Expresión regular para encontrar todos los textos
                 
@@ -476,7 +472,7 @@ It is very important that you normalize those emotional reactions that, although
                     escala=escalas
                 )
                 self.nuevoHistorial = self.dialogue.addHistory(self.historial_final)
-                print(self.dialogue.getUserHistory)
+                
                 self.caso_final=""
                 self.escala_final=""
                 self.caso_final=ultimo_mensaje
@@ -491,9 +487,7 @@ It is very important that you normalize those emotional reactions that, although
                 caso = self.dialogue.get_casos_from_backend()
                 historial = self.dialogue.getUserHistory()
                 r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
-                self.avance_1+= f"""
-                {r}
-                """
+                
                 print(r)
                 # Expresión regular para encontrar todos los textos
                 
@@ -584,9 +578,7 @@ It is very important that you normalize those emotional reactions that, although
                 caso = self.dialogue.get_casos_from_backend()
                 historial = self.dialogue.getUserHistory()
                 r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
-                self.avance_1+= f"""
-                {r}
-                """
+                
                 print(r)
                 # Expresión regular para encontrar todos los textos
                 
@@ -678,9 +670,7 @@ It is very important that you normalize those emotional reactions that, although
                 caso = self.dialogue.get_casos_from_backend()
                 historial = self.dialogue.getUserHistory()
                 r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
-                self.avance_1+= f"""
-                {r}
-                """
+                
                 print(r)
                 # Expresión regular para encontrar todos los textos
                 
