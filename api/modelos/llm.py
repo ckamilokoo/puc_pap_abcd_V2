@@ -14,6 +14,52 @@ apikey = os.getenv('apikey')
 project_id = os.getenv('project_id')
 
 class CustomAgent:
+    system_prompt = None
+    user_prompt = None
+    full_prompt = None
+    emotional_state = None  # Almacenar estado emocional
+
+    def __init__(self):
+        parameters = {
+            "decoding_method": "greedy",
+            "max_new_tokens": 4000,
+            "repetition_penalty": 1,
+            "temperature" : 1
+        }
+
+        self.model = Model(
+            model_id = "meta-llama/llama-3-405b-instruct",
+            credentials = get_credentials(),
+            project_id = project_id,
+            params=parameters
+        )
+
+    def addSystemPrompt(self, system_prompt):
+        self.system_prompt = f"""
+        <|start_header_id|>system<|end_header_id|>
+
+        {system_prompt}
+        """
+
+    def addUserPrompt(self, user_prompt):
+        self.user_prompt = f"""
+        <|begin_of_text|><|eot_id|><|start_header_id|>user<|end_header_id|>
+        {user_prompt}
+        """
+
+    def runAgent(self):
+        prompt = f"""
+            {self.system_prompt}
+            
+            {self.user_prompt}
+            
+            <|eot_id|><|start_header_id|>assistant<|end_header_id|>
+            """
+
+        generated_response = self.model.generate_text(prompt=prompt)
+        return generated_response
+
+class Dialogue:
     def __init__(self, agent, agent_techniques,patient_params):
         self.agent = agent
         self.patient_params = patient_params
