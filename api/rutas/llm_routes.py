@@ -171,7 +171,7 @@ class LLM_Routes():
         @simple_page.route("/endInteraction", methods = ["GET"])
         @cross_origin()
         def f():
-            r=respuesta_final(self.caso_inicial , self.caso_final , self.escala_inicial , self.escala_final)
+            r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
             # Ajustar el formato de la respuesta
             response_data = {
                 "response": {
