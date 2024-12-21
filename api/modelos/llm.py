@@ -28,7 +28,7 @@ class CustomAgent:
         }
 
         self.model = Model(
-            model_id = "meta-llama/llama-3-3-70b-instruct",
+            model_id = "meta-llama/llama-3-405b-instruct",
             credentials = get_credentials(),
             project_id = project_id,
             params=parameters
@@ -83,7 +83,7 @@ class Dialogue:
         {self.patient_params['descripcion_personaje']}
         
         Instructions for the Patient’s Responses:
-        never in your answers say or answer how can I help you today?
+        
         Most importantly, the patient must demonstrate behavioral improvement based on the techniques that the specialist applied on him/her.
         The patient must appear natural in their responses.
         The patient must follow all instructions given by the psychiatrist.
