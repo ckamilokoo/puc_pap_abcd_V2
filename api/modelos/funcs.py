@@ -16,7 +16,7 @@ project_id = os.getenv('project_id')
 
 
 llama_3_model = WatsonxLLM(
-    model_id="meta-llama/llama-3-70b-instruct",
+    model_id = "meta-llama/llama-3-405b-instruct",
     url="https://us-south.ml.cloud.ibm.com",
     apikey=apikey,
     project_id=project_id,

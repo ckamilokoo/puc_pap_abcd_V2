@@ -13,7 +13,112 @@ import datetime
 import os
 import re
 
+techniques_agent = CustomAgent()
+techniques_agent.addSystemPrompt("""
+Task:
+You are an evaluator specialized in identifying the use of therapeutic techniques in conversations between a patient and a mental health specialist. You will be provided with a transcript of a dialogue between a patient and a specialist. Your goal is to determine whether the specialist has applied the following techniques at any point in the conversation.
 
+                                              A. Active listening: In this state, the person may or may not want to tell their story. Listening to that testimony can be of great help in calming the affected person, so it is essential to give space for them to spontaneously tell what is happening to them, without pressuring them. For other people, keeping quiet will be preferable: staying by their side, in silence, can be very helpful. The central aspect of active listening is being able to transmit to the other person that there is a human being who understands what is happening to them. 
+                                              What you should say:In this state, the person may or may not want to tell their story. Listening to that testimony can be of great help in calming the affected person, so it is essential to give space for them to spontaneously tell what is happening to them, without pressuring them. For other people, keeping quiet will be preferable: staying by their side, in silence, can be very helpful. The central aspect of active listening is being able to transmit to the other person that there is a human being who understands what is happening to them.   
+                                              What you should not say
+                                              -	Do not get distracted
+                                              -	Do not look at the clock or look the other way
+                                              -	Do not rush to give a solution if the person wants to be heard
+                                              -	Do not judge what the person did or did not do, felt or did not feel: 
+                                              “You should not have done that”
+                                              “You should not feel that way”
+                                              Do not tell another person’s story or your own. 
+                                              Do not touch the person if you are not sure that it will be well received. 
+                                              Do not minimize or give false hope: 
+                                              “I can assure you that you will get through this
+                                              “Fortunately, it is not that bad”
+                                              “Now you have a little angel who takes care of you”
+                                              “Don’t worry ... you’re young, and you will find a partner soon”
+                                              “God knows why he does things”
+                                              “Every cloud has a silver lining”
+                                              “Everything happens for a reason”
+                                              If the person is very distressed, help them calm down. Offer a glass of water if possible or advance to the next step: Breathing Retraining.
+                                              Breathing Techniques:
+
+1.-Approach the person and tell them
+“Now we will practice the retraining of breathing: it consists of breathing in, breathing out and then waiting for a moment with our lungs empty before breathing in again... the important thing is to pause after emptying our lungs.”
+
+2.-You can ask them to practice it together.
+
+3.-To begin, ask the person to adopt a relaxed and comfortable posture, putting their feet on the floor and feeling that contact.
+“If you want and feel comfortable, you can close your eyes or look at a fixed point with your eyes down. Now let’s try ...”
+ 
+1.	BREATHING IN: Counting to 4
+2.	BREATHING OUT THROUGH THE NOSE OR MOUTH: Counting to 4
+3.	RETENTION WITH “EMPTY” LUNGS: Counting to 4
+ 
+ Counting to 4 does not necessarily mean 4 seconds. The duration of the times is variable, depending on the state of agitation of the person. Accommodate the length of time so that the affected person feels comfortable and does not run out of air
+
+ “To help yourself, you can mentally and slowly repeat the word calm each time you breathe out or you can imagine that the tension escapes with the air you breathe out. Let’s try again ...”  
+
+Once the affected person has understood the mechanics, you can let them continue for only 10 minutes, reinforcing how well they are doing:
+
+“very good… you’re doing great.”
+
+In addition, you can also use the adapted guidelines of Foa, Hembree and Rothbaum (2007) for the breathing retraining, which follow the same logic previously explained
+ 
+· Explain in detail the logic of the exercise: 
+“The way we breathe modifies our emotions. When we breath out we relax more than when we breath in (contrary to what is usually believed), so we can enter a calm state if we extend the time our lungs are empty ...”
+
+· Explain and demonstrate the mechanics of the exercise: 
+“In this exercise you need to breath counting to four, breath out counting to four and wait counting to four before inhaling again.” Now look at how I do it... [do it yourself].
+
+· Join them in doing the exercise: 
+“Now you do the exercise and I will accompany you by reminding you how you should do it. Inhale... two, three, four ... exhale, two, three four ... hold, two three, four ... "[repeat the cycle for one or two minutes accompanying the affected person]. “While exhaling, you can think of the word calm."
+
+· Tell the affected person to do it daily for ten minutes, three times a day (morning, evening, night), and every time they feel distressed. You can use the Breath Pacer or Paced Breathing apps available for smart phones: 
+
+“I am going to ask you to do this exercise for 10 minutes every day in the morning when you wake up, after lunch, before going to sleep and every time you feel that you are beginning to feel anxious. The more you use this technique, the easier it will be the next time you use it." You can use some free applications available for cellphones, such as Breath Pacer and Paced Breathing.
+
+C. Classification of Needs
+After a traumatic event it is common for mental confusion to occur and people have difficulty organizing the different steps they must follow to solve their problems (e.g. incident claims, calling relatives, searching for belongings, legal procedures, etc.) You can help the person a lot by accompanying them in the process of prioritizing their needs, and then helping them contact the health and social security services that may be of help. Remember that this is a brief intervention, and your work focuses on helping identify needs and prioritize them. It is important that the person uses their own resources or those of their personal or community support networks to cope with the crisis they are experiencing, so that what is achieved is maintained after you finish your work.
+What you should do or say 
+Listen to the story and identify the concerns of the affected person 
+“What is your concern or need now? Can I help you solve it? “
+
+Help people prioritize their needs: You can ask them to distinguish between what they need to solve immediately and what can wait: 
+
+“... I realize that there are many things that concern you. How about we go step by step and focus first on what’s most urgent?
+
+What you should NOT do or say 
+Decide what their needs are, without paying attention to the affected person’s story. 
+“Before you tell me anything, I think the most important thing you should do is...”
+
+Resolve the needs as the affected person mentions them, without organizing or prioritizing. 
+
+You can also try with the following sentences (available in Figueroa, Cortés, Accatino and Sorensen, 2016): 
+• “What do you think is the most important problem to solve first?” 
+• “What things have helped you in the past when you have had to deal with this much stress?” 
+• “Obviously there are too many problems together, so it would be a good idea to order them and go one by one ... if you want I can help you do it.” 
+• “I understand that you feel overwhelmed. Let’s see if we can identify at least three things that you currently have control over to focus on.” 
+
+D. Direct to Support Networks
+Once these needs have been identified, help the person contact the people and/or social support services that can help them meet these needs now and later, next to the material Services and Support Networks (see Annex). 
+Always remember that the first support network is family and friends. For this step, it is essential that before contacting the affected person, you study the offer of social support services available in the place where PFA will be provided.
+What you should do or say
+Facilitate contact with the person’s family, friends and/or work. Suggest calling them if necessary (identify available public telephones or manage a cell phone with your institution).
+Make practical suggestions on how to receive the help needed. 
+Use the contact information available in the Services and Support Networks material.
+What you should NOT do or say
+Take the initiative to “help” the person with issues that themselves can do.
+“I will go talk to the social worker about your mother’s situation”
+“Give me your cell phone, I’ll call your son to tell him what happened”
+You can take advantage of the following useful phrases (available in Figueroa, Cortés, Accatino and Sorensen, 2016): 
+• “Does your family know what happened and that you are here?” 
+• “It is very helpful to be with friends and family ... spend time together, be accompanied; is there a time in the week you can regularly spend time with your friends and family?” 
+• “I understand that you may distrust public support services, but if you later change your mind, I would like you to know how to contact them.” 
+• “I do not have information about the situation of your children, but let’s see if we can find out something about them in sites that search for people or with the police ...” 
+• “If you have any doubts later, you can come and ask me, or maybe you will want to call the toll-free number Salud Responde (600 360 7777), where someone can guide you 24/7” 
+E. Psycho-education
+Finally, promote positive response strategies to stressful situations, explaining and delivering a copy of the material, What can I Expect in a Crisis? (See Annex). Review the material with the affected person and answer their questions. 
+You can use the following table, which is useful to know the normal reactions in stressful situations or recent traumatic experiences. 
+It is very important that you normalize those emotional reactions that, although somewhat uncomfortable, are normal in crisis situations, such as emotional lability, difficulty thinking, insomnia, anxiety, among others. In this way the person will not interpret what happens to them as a sign of “losing their mind”. Emphasize that it is most likely that the discomfort they feel will go away in a few weeks without help, show them how to help themselves and their acquaintances, what the warning signs are, and what to do if they appear.
+""")
 
 conversation_agent = CustomAgent()
 conversation_agent.addSystemPrompt("""
@@ -292,465 +397,9 @@ It is very important that you normalize those emotional reactions that, although
             response = None
             
             # Verifica si han pasado los 5, 10 o 40 minutos para preguntar cómo se siente el paciente
-            if dif == datetime.timedelta(minutes=40) :
+            if dif >= datetime.timedelta(minutes=40) :
+
                 return jsonify({"response": {"speaker": "", "text": "El tiempo ha finalizado"}})
-            
-            if dif > datetime.timedelta(minutes=25) and self.contador==4:
-                self.contador += 1
-                # Respuesta estándar si no ha transcurrido mucho tiempo
-                response = self.dialogue.getNextResponse(doctor_answer=msg)
-                caso = self.dialogue.get_casos_from_backend()
-                #print(caso)
-                historial = self.dialogue.getUserHistory()
-                print(historial)
-                r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
-                
-                #print(r)
-                # Expresión regular para encontrar todos los textos
-    
-                # Verifica si r es un diccionario y contiene una clave "text"
-                if isinstance(r, dict) and "text" in r:
-                    ultimo_texto = r["text"]
-                    #print("Último texto:", ultimo_texto)
-                else:
-                    print("El formato de la respuesta no es el esperado:", r)
-                # Divide el texto y conserva solo la parte que sigue a la frase específica
-                partes = historial.split("This is the current conversation:")
-                if len(partes) > 1:
-                    historial_recortado =  partes[1]
-                else:
-                    historial_recortado = historial
-
-                print("Historial recortado:", historial_recortado)
-                self.historial_final+= f"""
-                {historial_recortado}
-                """
-                #print(caso)
-                contexto=caso[0]['contexto']
-                # Agregar más texto al final
-                escalas=caso[0]['escala']
-                #print(type(escalas))
-                escalas_string = str(escalas)
-                #print(type(escalas_string))
-                descripcion=caso[0]['descripcion']
-                
-                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas_string)]})
-
-                # Obtener el último mensaje de 'messages'
-                ultimo_mensaje = resultado2['resultado_final'][-1].content
-                analisis_final=resultado2['analisis'][-1].content
-                #print(analisis_final)
-                # Verificar y extraer datos de resultado2
-                if resultado2.get('resultado_final') and resultado2['resultado_final'][-1]:
-                    ultimo_mensaje = resultado2['resultado_final'][-1].content
-                else:
-                    raise ValueError("Error: resultado_final no tiene el formato esperado.")
-
-                if resultado2.get('analisis') and resultado2['analisis'][-1]:
-                    analisis_final = resultado2['analisis'][-1].content.strip()
-                else:
-                    raise ValueError("Error: analisis no tiene el formato esperado.")
-
-                # Actualizar escalas según analisis_final
-                if analisis_final == "neutral":
-                    pass  # Escala permanece igual
-                elif analisis_final == "positivo" and escalas < 5:
-                    escalas += 1
-                elif analisis_final == "negativo" and escalas > 1:
-                    escalas -= 1
-                else:
-                    print("Análisis desconocido:", analisis_final)
-                
-                print(escalas)
-                
-                patient_params = {
-                    "contexto_para_participantes": ultimo_mensaje,
-                    "descripcion_personaje": descripcion,
-                }
-                print(patient_params)
-                
-                self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params)
-                self.eliminar_caso=self.dialogue.delete_all_casos_from_backend()
-                self.send_response = self.dialogue.send_case_to_api(
-                    contexto=ultimo_mensaje,
-                    descripcion=descripcion,
-                    escala=escalas
-                )
-                self.nuevoHistorial = self.dialogue.addHistory(self.historial_final)
-                
-                self.caso_final=""
-                self.escala_final=""
-                self.caso_final=ultimo_mensaje
-                self.escala_final=escalas_string
-                return jsonify({"response": response}), 200
-            
-            
-            if dif > datetime.timedelta(minutes=20) and self.contador==3:   
-                self.contador += 1   
-                # Respuesta estándar si no ha transcurrido mucho tiempo
-                response = self.dialogue.getNextResponse(doctor_answer=msg)
-                caso = self.dialogue.get_casos_from_backend()
-                #print(caso)
-                historial = self.dialogue.getUserHistory()
-                r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
-                
-                #print(r)
-                # Expresión regular para encontrar todos los textos
-                
-
-                # Verifica si r es un diccionario y contiene una clave "text"
-                if isinstance(r, dict) and "text" in r:
-                    ultimo_texto = r["text"]
-                    #print("Último texto:", ultimo_texto)
-                else:
-                    print("El formato de la respuesta no es el esperado:", r)
-                # Divide el texto y conserva solo la parte que sigue a la frase específica
-                punto = "This is the current conversation:"
-                partes = historial.split(punto)
-                print(partes)
-
-                # Si la frase se encuentra en el texto, 'partes' tendrá al menos dos elementos
-                if len(partes) > 1:
-                    # Agregar un salto de línea antes de la frase
-                    historial_recortado = "\n" + punto + partes[1]  # Concatenar con un salto de línea
-                else:
-                    historial_recortado = historial  # Si no se encuentra la frase, usar el texto completo
-
-                print("Historial recortado:", historial_recortado)
-                self.historial_final+= f"""
-                {historial_recortado}
-                """
-                #print(caso)
-                contexto=caso[0]['contexto']
-                # Agregar más texto al final
-                escalas=caso[0]['escala']
-                #print(type(escalas))
-                escalas_string = str(escalas)
-                #print(type(escalas_string))
-                descripcion=caso[0]['descripcion']
-                
-                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas_string)]})
-
-                # Obtener el último mensaje de 'messages'
-                ultimo_mensaje = resultado2['resultado_final'][-1].content
-                analisis_final=resultado2['analisis'][-1].content
-                #print(analisis_final)
-                # Verificar y extraer datos de resultado2
-                if resultado2.get('resultado_final') and resultado2['resultado_final'][-1]:
-                    ultimo_mensaje = resultado2['resultado_final'][-1].content
-                else:
-                    raise ValueError("Error: resultado_final no tiene el formato esperado.")
-
-                if resultado2.get('analisis') and resultado2['analisis'][-1]:
-                    analisis_final = resultado2['analisis'][-1].content.strip()
-                else:
-                    raise ValueError("Error: analisis no tiene el formato esperado.")
-
-                # Actualizar escalas según analisis_final
-                if analisis_final == "neutral":
-                    pass  # Escala permanece igual
-                elif analisis_final == "positivo" and escalas < 5:
-                    escalas += 1
-                elif analisis_final == "negativo" and escalas > 1:
-                    escalas -= 1
-                else:
-                    print("Análisis desconocido:", analisis_final)
-                
-                print(escalas)
-                
-                patient_params = {
-                    "contexto_para_participantes": ultimo_mensaje,
-                    "descripcion_personaje": descripcion,
-                }
-                print(patient_params)
-                
-                self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params)
-                self.eliminar_caso=self.dialogue.delete_all_casos_from_backend()
-                self.send_response = self.dialogue.send_case_to_api(
-                    contexto=ultimo_mensaje,
-                    descripcion=descripcion,
-                    escala=escalas
-                )
-                self.nuevoHistorial = self.dialogue.addHistory(self.historial_final)
-                
-                self.caso_final=""
-                self.escala_final=""
-                self.caso_final=ultimo_mensaje
-                self.escala_final=escalas_string
-                return jsonify({"response": response}), 200
-            
-            
-            if dif > datetime.timedelta(minutes=15) and self.contador==2:
-                self.contador += 1
-                # Respuesta estándar si no ha transcurrido mucho tiempo
-                response = self.dialogue.getNextResponse(doctor_answer=msg)
-                caso = self.dialogue.get_casos_from_backend()
-                historial = self.dialogue.getUserHistory()
-                r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
-                
-                print(r)
-                # Expresión regular para encontrar todos los textos
-                
-
-                # Verifica si r es un diccionario y contiene una clave "text"
-                if isinstance(r, dict) and "text" in r:
-                    ultimo_texto = r["text"]
-                    print("Último texto:", ultimo_texto)
-                else:
-                    print("El formato de la respuesta no es el esperado:", r)
-                # Divide el texto y conserva solo la parte que sigue a la frase específica
-                punto = "This is the current conversation:"
-                partes = historial.split(punto)
-
-                # Si la frase se encuentra en el texto, 'partes' tendrá al menos dos elementos
-                if len(partes) > 1:
-                    # Agregar un salto de línea antes de la frase
-                    historial_recortado = "\n" + punto + partes[1]  # Concatenar con un salto de línea
-                else:
-                    historial_recortado = historial  # Si no se encuentra la frase, usar el texto completo
-
-                print("Historial recortado:", historial_recortado)
-                self.historial_final+= f"""
-                {historial_recortado}
-                """
-                print(caso)
-                contexto=caso[0]['contexto']
-                # Agregar más texto al final
-                escalas=caso[0]['escala']
-                print(type(escalas))
-                escalas_string = str(escalas)
-                descripcion=caso[0]['descripcion']
-                
-                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas_string)]})
-
-                # Obtener el último mensaje de 'messages'
-                ultimo_mensaje = resultado2['resultado_final'][-1].content
-                analisis_final=resultado2['analisis'][-1].content
-                print(analisis_final)
-                # Verificar y extraer datos de resultado2
-                if resultado2.get('resultado_final') and resultado2['resultado_final'][-1]:
-                    ultimo_mensaje = resultado2['resultado_final'][-1].content
-                else:
-                    raise ValueError("Error: resultado_final no tiene el formato esperado.")
-
-                if resultado2.get('analisis') and resultado2['analisis'][-1]:
-                    analisis_final = resultado2['analisis'][-1].content.strip()
-                else:
-                    raise ValueError("Error: analisis no tiene el formato esperado.")
-
-                # Actualizar escalas según analisis_final
-                if analisis_final == "neutral":
-                    pass  # Escala permanece igual
-                elif analisis_final == "positivo" and escalas < 5:
-                    escalas += 1
-                elif analisis_final == "negativo" and escalas > 1:
-                    escalas -= 1
-                else:
-                    print("Análisis desconocido:", analisis_final)
-                
-                print(escalas)
-                
-                patient_params = {
-                    "contexto_para_participantes": ultimo_mensaje,
-                    "descripcion_personaje": descripcion,
-                }
-                print(patient_params)
-                
-                self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params)
-                self.eliminar_caso=self.dialogue.delete_all_casos_from_backend()
-                self.send_response = self.dialogue.send_case_to_api(
-                    contexto=ultimo_mensaje,
-                    descripcion=descripcion,
-                    escala=escalas
-                )
-                self.nuevoHistorial = self.dialogue.addHistory(self.historial_final)
-                self.caso_final=""
-                self.escala_final=""
-                self.caso_final=ultimo_mensaje
-                self.escala_final=escalas_string
-                return jsonify({"response": response}), 200
-            
-            
-            if dif > datetime.timedelta(minutes=10) and self.contador==1:    
-                self.contador += 1
-                # Respuesta estándar si no ha transcurrido mucho tiempo
-                response = self.dialogue.getNextResponse(doctor_answer=msg)
-                caso = self.dialogue.get_casos_from_backend()
-                historial = self.dialogue.getUserHistory()
-                r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
-                
-                print(r)
-                # Expresión regular para encontrar todos los textos
-                
-
-                # Verifica si r es un diccionario y contiene una clave "text"
-                if isinstance(r, dict) and "text" in r:
-                    ultimo_texto = r["text"]
-                    print("Último texto:", ultimo_texto)
-                else:
-                    print("El formato de la respuesta no es el esperado:", r)
-                # Divide el texto y conserva solo la parte que sigue a la frase específica
-                punto = "This is the current conversation:"
-                partes = historial.split(punto)
-
-                # Si la frase se encuentra en el texto, 'partes' tendrá al menos dos elementos
-                if len(partes) > 1:
-                    # Agregar un salto de línea antes de la frase
-                    historial_recortado = "\n" + punto + partes[1]  # Concatenar con un salto de línea
-                else:
-                    historial_recortado = historial  # Si no se encuentra la frase, usar el texto completo
-
-                print("Historial recortado:", historial_recortado)
-                self.historial_final+= f"""
-                {historial_recortado}
-                """
-                
-                print(caso)
-                contexto=caso[0]['contexto']
-                # Agregar más texto al final
-                escalas=caso[0]['escala']
-                type(escalas)
-                escalas_string = str(escalas)
-                descripcion=caso[0]['descripcion']
-                
-                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas_string)]})
-
-                # Obtener el último mensaje de 'messages'
-                ultimo_mensaje = resultado2['resultado_final'][-1].content
-                analisis_final=resultado2['analisis'][-1].content
-                print(analisis_final)
-                # Verificar y extraer datos de resultado2
-                if resultado2.get('resultado_final') and resultado2['resultado_final'][-1]:
-                    ultimo_mensaje = resultado2['resultado_final'][-1].content
-                else:
-                    raise ValueError("Error: resultado_final no tiene el formato esperado.")
-
-                if resultado2.get('analisis') and resultado2['analisis'][-1]:
-                    analisis_final = resultado2['analisis'][-1].content.strip()
-                else:
-                    raise ValueError("Error: analisis no tiene el formato esperado.")
-
-                # Actualizar escalas según analisis_final
-                if analisis_final == "neutral":
-                    pass  # Escala permanece igual
-                elif analisis_final == "positivo" and escalas < 5:
-                    escalas += 1
-                elif analisis_final == "negativo" and escalas > 1:
-                    escalas -= 1
-                else:
-                    print("Análisis desconocido:", analisis_final)
-                
-                print(escalas)
-                
-                patient_params = {
-                    "contexto_para_participantes": ultimo_mensaje,
-                    "descripcion_personaje": descripcion,
-                }
-                print(patient_params)
-                
-                self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params)
-                self.eliminar_caso=self.dialogue.delete_all_casos_from_backend()
-                self.send_response = self.dialogue.send_case_to_api(
-                    contexto=ultimo_mensaje,
-                    descripcion=descripcion,
-                    escala=escalas
-                )
-                self.nuevoHistorial = self.dialogue.addHistory(self.historial_final)
-                self.caso_final=""
-                self.escala_final=""
-                self.caso_final=ultimo_mensaje
-                self.escala_final=escalas_string
-                return jsonify({"response": response}), 200
-            
-            
-            if dif > datetime.timedelta(minutes=5) and self.contador==0 :
-                self.contador += 1
-                # Respuesta estándar si no ha transcurrido mucho tiempo
-                response = self.dialogue.getNextResponse(doctor_answer=msg)
-                caso = self.dialogue.get_casos_from_backend()
-                historial = self.dialogue.getUserHistory()
-                r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
-                
-                print(r)
-                # Expresión regular para encontrar todos los textos
-                
-
-                # Verifica si r es un diccionario y contiene una clave "text"
-                if isinstance(r, dict) and "text" in r:
-                    ultimo_texto = r["text"]
-                    print("Último texto:", ultimo_texto)
-                else:
-                    print("El formato de la respuesta no es el esperado:", r)
-                # Divide el texto y conserva solo la parte que sigue a la frase específica
-                punto = "This is the current conversation:"
-                partes = historial.split(punto)
-
-                # Si la frase se encuentra en el texto, 'partes' tendrá al menos dos elementos
-                if len(partes) > 1:
-                    # Agregar un salto de línea antes de la frase
-                    historial_recortado = "\n" + punto + partes[1]  # Concatenar con un salto de línea
-                else:
-                    historial_recortado = historial  # Si no se encuentra la frase, usar el texto completo
-
-                print("Historial recortado:", historial_recortado)
-                self.historial_final+= f"""
-                {historial_recortado}
-                """
-                print(caso)
-                contexto=caso[0]['contexto']
-                # Agregar más texto al final
-                escalas=caso[0]['escala']
-                type(escalas)
-                escalas_string = str(escalas)
-                descripcion=caso[0]['descripcion']
-                
-                resultado2=graph2.invoke({"analisis": [("user", ultimo_texto )],"caso":[("user",contexto)],"escala":[("user",escalas_string)]})
-
-                # Obtener el último mensaje de 'messages'
-                ultimo_mensaje = resultado2['resultado_final'][-1].content
-                analisis_final=resultado2['analisis'][-1].content
-                print(analisis_final)
-                # Verificar y extraer datos de resultado2
-                if resultado2.get('resultado_final') and resultado2['resultado_final'][-1]:
-                    ultimo_mensaje = resultado2['resultado_final'][-1].content
-                else:
-                    raise ValueError("Error: resultado_final no tiene el formato esperado.")
-
-                if resultado2.get('analisis') and resultado2['analisis'][-1]:
-                    analisis_final = resultado2['analisis'][-1].content.strip()
-                else:
-                    raise ValueError("Error: analisis no tiene el formato esperado.")
-
-                # Actualizar escalas según analisis_final
-                if analisis_final == "neutral":
-                    pass  # Escala permanece igual
-                elif analisis_final == "positivo" and escalas < 5:
-                    escalas += 1
-                elif analisis_final == "negativo" and escalas > 1:
-                    escalas -= 1
-                else:
-                    print("Análisis desconocido:", analisis_final)
-                
-                print(escalas)
-                
-                patient_params = {
-                    "contexto_para_participantes": ultimo_mensaje,
-                    "descripcion_personaje": descripcion,
-                }
-                print(patient_params)
-                
-                self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params)
-                self.eliminar_caso=self.dialogue.delete_all_casos_from_backend()
-                self.send_response = self.dialogue.send_case_to_api(
-                    contexto=ultimo_mensaje,
-                    descripcion=descripcion,
-                    escala=escalas
-                )
-                self.nuevoHistorial = self.dialogue.addHistory(self.historial_final)
-                self.caso_final=ultimo_mensaje
-                self.escala_final=escalas_string
-                return jsonify({"response": response}), 200
-            
             
             else:
                 # Respuesta estándar si no ha transcurrido mucho tiempo

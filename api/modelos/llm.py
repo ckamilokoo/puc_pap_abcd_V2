@@ -14,114 +14,114 @@ apikey = os.getenv('apikey')
 project_id = os.getenv('project_id')
 
 class CustomAgent:
-    system_prompt = None
-    user_prompt = None
-    full_prompt = None
-    emotional_state = None  # Almacenar estado emocional
-
-    def __init__(self):
-        parameters = {
-            "decoding_method": "greedy",
-            "max_new_tokens": 4000,
-            "repetition_penalty": 1,
-            "temperature" : 1
-        }
-
-        self.model = Model(
-            model_id = "meta-llama/llama-3-70b-instruct",
-            credentials = get_credentials(),
-            project_id = project_id,
-            params=parameters
-        )
-
-    def addSystemPrompt(self, system_prompt):
-        self.system_prompt = f"""
-        <|start_header_id|>system<|end_header_id|>
-
-        {system_prompt}
-        """
-
-    def addUserPrompt(self, user_prompt):
-        self.user_prompt = f"""
-        <|begin_of_text|><|eot_id|><|start_header_id|>user<|end_header_id|>
-        {user_prompt}
-        """
-
-    def runAgent(self):
-        prompt = f"""
-            {self.system_prompt}
-            
-            {self.user_prompt}
-            
-            <|eot_id|><|start_header_id|>assistant<|end_header_id|>
-            """
-
-        generated_response = self.model.generate_text(prompt=prompt)
-        return generated_response
-
-    
-
-
-
-class Dialogue:
-    def __init__(self, agent, patient_params):
+    def __init__(self, agent, agent_techniques,patient_params):
         self.agent = agent
         self.patient_params = patient_params
-        
+        self.agent_techniques = agent_techniques
+        self.last_techniques_applied = ""
         self.user_history = f"""
-        Please, generate the next patient conversation between the patient and Psychiatrist.
-
-        The following situation occurred to the patient: {patient_params['contexto_para_participantes']}
+        Task: Please generate the next segment of a patient-psychiatrist conversation.
         
-        The patient should be characterized as follows: {patient_params['descripcion_personaje']}  , which you must remember to give your patient's answers.
+        Context: The following situation occurred to the patient:
         
-        The patient must answer following all the instructions given by the psychiatrist , You should always say hello first when you are greeted.
-        you should never mention your problem in the patient's context right away, you should always wait for the doctor to ask you how you feel or what is the problem that is bothering you or that you are suffering from.
 
-        Por favor, en las respuestas del paciente psiquiatrico no te pases de las 10 palabras
+        {self.patient_params['contexto_para_participantes']}
+        Techniques Applied by the Specialist:
 
-        This is the current conversation:
-        """
+        
+        Patient Characterization:
+        The patient is an ordinary person with natural emotions like anyone else.
+        The patient can appear hostile toward the doctor if they feel offended or threatened.
+        The patient can be grateful if the doctor helps them.
+        The patient should be characterized as follows:
+        {self.patient_params['descripcion_personaje']}
+        
+        Instructions for the Patient’s Responses:
+        Most importantly, the patient must demonstrate behavioral improvement based on the techniques that the specialist applied on him/her.
+        The patient must appear natural in their responses.
+        The patient must follow all instructions given by the psychiatrist.
+        The patient should always say “hello” first when greeted by the psychiatrist.
+        The patient should never mention their problem or context immediately. The patient should wait for the psychiatrist to specifically ask how they feel, what is bothering them, or what they are suffering from.
+        The patient should not exceed 30 words in their responses.
+        The patient should gradually show improved behavior (as noted above) based on the specialist’s applied techniques.
+        Current Conversation:
+                    """
+        
         self.initial_len = len(self.user_history)
 
     def getNextResponse(self, doctor_answer):
         if doctor_answer == "/reset":
             self.user_history = f"""
-            Please, generate the next patient conversation between the patient and Psychiatrist.
+         Task: Please generate the next segment of a patient-psychiatrist conversation.
+        
+        Context: The following situation occurred to the patient:
+        
 
-            The following situation occurred to the patient: {self.patient_params['contexto_para_participantes']}
+        {self.patient_params['contexto_para_participantes']}
+        Techniques Applied by the Specialist:
+
+        
+        Patient Characterization:
+        The patient is an ordinary person with natural emotions like anyone else.
+        The patient can appear hostile toward the doctor if they feel offended or threatened.
+        The patient can be grateful if the doctor helps them.
+        The patient should be characterized as follows:
+        {self.patient_params['descripcion_personaje']}
+        
+        Instructions for the Patient’s Responses:
+        Most importantly, the patient must demonstrate behavioral improvement based on the techniques that the specialist applied on him/her.
+        The patient must appear natural in their responses.
+        The patient must follow all instructions given by the psychiatrist.
+        The patient should always say “hello” first when greeted by the psychiatrist.
+        The patient should never mention their problem or context immediately. The patient should wait for the psychiatrist to specifically ask how they feel, what is bothering them, or what they are suffering from.
+        The patient should not exceed 30 words in their responses.
+        The patient should gradually show improved behavior (as noted above) based on the specialist’s applied techniques.
+        Current Conversation:
+                    
             
-            The patient should be characterized as follows: {self.patient_params['descripcion_personaje']}
-            
-            The patient must answer following all the instructions given by the psychiatrist , You should always say hello first when you are greeted.
-            you should never mention your problem in the patient's context right away, you should always wait for the doctor to ask you how you feel or what is the problem that is bothering you or that you are suffering from.
-
-            Por favor, en las respuestas del paciente psiquiatrico no te pases de las 10 palabras
-
-            This is the current conversation:
             """
+            self.last_techniques_applied = ""
             return "Se ha eliminado el historial de la conversación"
 
         # Agregar la respuesta del doctor
         self.user_history += f"""
-        "speaker": "Doctor",
+        "speaker": "Specialist",
         "text": "{doctor_answer}"
         """
         
         # Generar respuesta del modelo
         self.agent.addUserPrompt(self.user_history)
         agent_response = self.agent.runAgent()
+
+        # Vemos las técnicas utilizadas
+
+        
         
         # Actualizar el historial con la respuesta del agente
         self.user_history += f"""
         {agent_response}
         """
-        print(agent_response)
-        print(self.user_history)
+
+        #print(agent_response)
+        #print(self.user_history)
         
-        
+        self.addTechniquesToHistorial()
         agent_response = "{"+agent_response+"}"
         return json.loads(agent_response)
+    def addTechniquesToHistorial(self):
+        prompt_techniques = f"""This is the current conversation, please identify the techniques used by the specialist:
+        {self.user_history}"""
+        self.agent_techniques.addUserPrompt(prompt_techniques)
+        response = self.agent_techniques.runAgent()
+        pattern = "Techniques Applied by the Specialist:"
+        idx = self.user_history.find(pattern)
+        first_cut = self.user_history[0:idx+len(pattern)]
+        first_cut+=f"\n{response}\n"
+        first_cut+=self.user_history[idx+len(pattern):]
+        self.user_history = first_cut
+        self.user_history.replace(self.last_techniques_applied, "")
+        self.last_techniques_applied = response
+        #print(self.user_history)
 
     def getUserHistory(self):
         return self.user_history
