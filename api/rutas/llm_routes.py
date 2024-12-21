@@ -436,7 +436,7 @@ It is very important that you normalize those emotional reactions that, although
 
                 
                 # Crear una nueva instancia del diálogo
-                self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params)
+                self.dialogue = Dialogue(agent=conversation_agent, patient_params=patient_params ,agent_techniques=techniques_agent)
                 # Llamar al método send_case_to_api usando la instancia del diálogo
                 self.eliminar_caso=self.dialogue.delete_all_casos_from_backend()
                 self.send_response = self.dialogue.send_case_to_api(
