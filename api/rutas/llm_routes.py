@@ -152,18 +152,17 @@ REMEMBER YOU MUST ALWAYS ANSWER IN SPANISH
 """)
 feedback_agent = CustomAgent()
 feedback_agent.addSystemPrompt("""
-You are an agentexpert at generating feedback from conversations if the learner is to say whether the doctor was intuitive, able to understand what the patient was saying or whether his or her answers were accurate or not..""")
+You are an agentexpert at generating feedback from conversations if the learner is to say whether the doctor was intuitive, able to understand what the patient was saying or whether his or her answers were accurate or not..
+YOU MUST ALWAYS ANSWER IN SPANISH                               
+""")
 class LLM_Routes():
     llm_bp = []
     dialogue = None
     init_time = None
     current_time = None
     contador=0
-    historial_final=""
     caso_inicial=""
-    escala_inicial=""
     caso_final=""
-    escala_final=""
     
     
     def endInteraction(self):
@@ -171,7 +170,7 @@ class LLM_Routes():
         @simple_page.route("/endInteraction", methods = ["GET"])
         @cross_origin()
         def f():
-            r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido después de esta charla conmigo?")
+            r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido en esta charla, desde el inicio hasta el final? ¿Te sientes mejor?")
             # Ajustar el formato de la respuesta
             response_data = {
                 "response": {
@@ -293,19 +292,11 @@ You can use the following table, which is useful to know the normal reactions in
 It is very important that you normalize those emotional reactions that, although somewhat uncomfortable, are normal in crisis situations, such as emotional lability, difficulty thinking, insomnia, anxiety, among others. In this way the person will not interpret what happens to them as a sign of “losing their mind”. Emphasize that it is most likely that the discomfort they feel will go away in a few weeks without help, show them how to help themselves and their acquaintances, what the warning signs are, and what to do if they appear.
                                               
             {historial}
-            
+            REMEMBER ANSWER IN SPANISH
             """)
             response= feedback_agent.runAgent()
-            traslator_agent.addSystemPrompt(f"""
-            please, translate the following text from english to spanish
-                                            
-            {response}
-
-            remember answer in spanish
-            """)
-            translated_response = traslator_agent.runAgent()
             
-            return jsonify({"response": f"{translated_response}"}),200
+            return jsonify({"response": f"{response}"}),200
         self.llm_bp.append(simple_page)
     def NuevoCaso(self):
         simple_page = Blueprint("NuevoCaso", __name__)
