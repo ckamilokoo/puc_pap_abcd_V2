@@ -1,3 +1,4 @@
 ambiente/
 
 .env
+.api.env

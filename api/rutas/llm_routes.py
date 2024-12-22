@@ -187,7 +187,7 @@ class LLM_Routes():
         @simple_page.route("/getFeedback", methods = ["GET"])
         @cross_origin()
         def f():
-            historial = self.historial_final
+            historial = self.dialogue.getUserHistory()
             print(historial)
             feedback_agent.addUserPrompt(f"""
             Give me feedback of the next conversation using the following metrics
