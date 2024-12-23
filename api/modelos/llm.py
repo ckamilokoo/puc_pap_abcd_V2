@@ -19,7 +19,8 @@ class CustomAgent:
     full_prompt = None
     emotional_state = None  # Almacenar estado emocional
 
-    def __init__(self):
+    def __init__(self,custom_model = "meta-llama/llama-3-405b-instruct"):
+        self.custom_model = custom_model
         parameters = {
             "decoding_method": "greedy",
             "max_new_tokens": 4000,
@@ -28,7 +29,7 @@ class CustomAgent:
         }
 
         self.model = Model(
-            model_id = "meta-llama/llama-3-405b-instruct",
+            model_id = custom_model,
             credentials = get_credentials(),
             project_id = project_id,
             params=parameters

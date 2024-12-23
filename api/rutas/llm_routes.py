@@ -135,14 +135,6 @@ You should always generate the response following the following format and in Sp
 
 
 """)
-feedback_agent = CustomAgent()
-feedback_agent.addSystemPrompt("""
-You are a medical specialist in psychiatry, in charge of giving feedback on a conversation.
-
-                                                              
-YOU MUST ALWAYS GENERATE THE RESPONSE IN SPANISH
-
-""")
 
 traslator_agent = CustomAgent()
 traslator_agent.addSystemPrompt("""
@@ -150,7 +142,7 @@ You are an agent specialized on translating from english to spanish
                                 
 REMEMBER YOU MUST ALWAYS ANSWER IN SPANISH
 """)
-feedback_agent = CustomAgent()
+feedback_agent = CustomAgent(custom_model = "meta-llama/llama-3-3-70b-instruct")
 feedback_agent.addSystemPrompt("""
 You are an agentexpert at generating feedback from conversations if the learner is to say whether the doctor was intuitive, able to understand what the patient was saying or whether his or her answers were accurate or not..
 YOU MUST ALWAYS ANSWER IN SPANISH                               
