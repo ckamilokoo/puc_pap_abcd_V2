@@ -167,20 +167,31 @@ class LLM_Routes():
     
     def endInteraction(self):
         simple_page = Blueprint("endInteraction", __name__)
-        @simple_page.route("/endInteraction", methods = ["GET"])
+        
+        @simple_page.route("/endInteraction", methods=["GET"])
         @cross_origin()
         def f():
+            # Obtener la respuesta
             r = self.dialogue.getNextResponse(doctor_answer="¿Cómo te has sentido en esta charla, desde el inicio hasta el final? ¿Te sientes mejor?")
-            # Ajustar el formato de la respuesta
+            
+            # Aquí r ya es un diccionario, no necesitas json.loads()
+            response_dict = r
+            
+            # Extraer el valor asociado con la clave "text"
+            extracted_text = response_dict.get("text", "Respuesta no disponible")
+            
+            # Construir la respuesta
             response_data = {
                 "response": {
                     "speaker": "IA",  # Puedes personalizar o parametrizar el speaker si es necesario
-                    "text": r  # El texto que retorna tu función
+                    "text": extracted_text  # El texto extraído
                 }
             }
             
             return jsonify(response_data), 200
+
         self.llm_bp.append(simple_page)
+
     def getFeedback(self):
         simple_page = Blueprint("getFeedback", __name__)
         @simple_page.route("/getFeedback", methods = ["GET"])
@@ -294,9 +305,28 @@ It is very important that you normalize those emotional reactions that, although
             {historial}
             REMEMBER ANSWER IN SPANISH
             """)
-            response= feedback_agent.runAgent()
             
-            return jsonify({"response": f"{response}"}),200
+            response= feedback_agent.runAgent()
+            #print(response)
+            #print(type(response))
+            try:
+                # Parsear el texto de la respuesta para extraer "speaker" y "text"
+                match = re.search(r'"speaker":\s*"([^"]+)",\s*"text":\s*"([^"]+)"', response)
+                if match:
+                    speaker = match.group(1)
+                    text = match.group(2)
+                    # Crear el JSON esperado
+                    structured_response = {
+                        "response": {
+                            "speaker": speaker,
+                            "text": text
+                        }
+                    }
+                    return jsonify(structured_response), 200
+                else:
+                    return jsonify({"error": "No se pudo procesar la respuesta del agente"}), 400
+            except Exception as e:
+                return jsonify({"error": f"Error procesando la respuesta: {str(e)}"}), 500
         self.llm_bp.append(simple_page)
     def NuevoCaso(self):
         simple_page = Blueprint("NuevoCaso", __name__)
